@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.cambak21.mapper.adminOrderManage">
+	<select id="cambakOrderList" resultType="com.cambak21.domain.CampingVO">
+		select payment.payment_no, payment.payment_date, product.product_name, payment.member_id, destination.destination_address, destination.destination_toUser,
+		destination.destination_mobile, payment.payment_deliveryMsg, product.product_factory, poin.point_usedPoint, buyProduct.buyProduct_deliveriPay, buyProduct.buyProduct_totPrice, 
+		poin.point_futurePoint, deliverie.delivery_status, payInfo.payInfo_way, refundnExchange.refundnExchange_status from Payments payment
+		join  BuyProducts buyProduct on payment.buyProduct_no = buyProduct.buyProduct_no
+		join Destinations destination on destination.destination_no = payment.destination_no
+		join Products product on buyProduct.product_name = product.product_name
+		join PayInfos payInfo on payInfo.payInfo_no = payment.payInfo_no
+		left join Deliveries deliverie on payment.payment_serialNo = deliverie.payment_serialNo
+		left join RefundnExchanges refundnExchange  on payment.payment_serialNo = refundnExchange.payment_serialNo
+		left join Points poin on poin.buyProduct_no = payment.buyProduct_no
+		join Members member on member.member_id = payment.member_id
+		group by payment.payment_serialNo
+	</select>
+	
+	<select id="cambakOrderDetail" resultType="com.cambak21.domain.CampingVO">
+		select payment.payment_no, payment.payment_date, product.product_name, payment.member_id, destination.destination_address, destination.destination_toUser,
+		destination.destination_mobile, payment.payment_deliveryMsg, product.product_factory, poin.point_usedPoint, buyProduct.buyProduct_deliveriPay, buyProduct.buyProduct_totPrice, 
+		poin.point_futurePoint, deliverie.delivery_status, payInfo.payInfo_way, refundnExchange.refundnExchange_status from Payments payment
+		join  BuyProducts buyProduct on payment.buyProduct_no = buyProduct.buyProduct_no
+		join Destinations destination on destination.destination_no = payment.destination_no
+		join Products product on buyProduct.product_name = product.product_name
+		join PayInfos payInfo on payInfo.payInfo_no = payment.payInfo_no
+		left join Deliveries deliverie on payment.payment_serialNo = deliverie.payment_serialNo
+		left join RefundnExchanges refundnExchange  on payment.payment_serialNo = refundnExchange.payment_serialNo
+		left join Points poin on poin.buyProduct_no = payment.buyProduct_no
+		join Members member on member.member_id = payment.member_id
+		where payment.payment_no = #{payment.payment_no}
+		group by payment.payment_serialNo
+	</select>
+	
+</mapper>

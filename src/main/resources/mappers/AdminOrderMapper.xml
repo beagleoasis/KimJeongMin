@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cambak21.mappers.AdminOrderMapper">
+   <select id="AdminOrderList" resultType="com.cambak21.domain.AdminRefundnExchangeVO">
+      select payment.member_id,
+       refundnExchange.refundnExchange_reason ,
+       refundnExchange.refundnExchange_date ,
+      refundnExchange.refundnExchange_status ,
+      buyProduct.product_name
+      from Payments payment
+      join RefundnExchanges refundnExchange on payment.payment_serialNo = refundnExchange.payment_serialNo
+      join BuyProducts buyProduct on payment.buyProduct_no = buyProduct.buyProduct_no
+      order by payment.payment_serialNo  desc
+      limit #{pageStert} , #{pageNum};
+   </select>
+   <select id="AdminOrderListCnt" resultType="int">
+      select count(*) from 
+      (select payment.member_id,
+       refundnExchange.refundnExchange_reason ,
+       refundnExchange.refundnExchange_date ,
+      refundnExchange.refundnExchange_status ,
+      buyProduct.product_name
+      from Payments payment
+      join RefundnExchanges refundnExchange on payment.payment_serialNo = refundnExchange.payment_serialNo
+      join BuyProducts buyProduct on payment.buyProduct_no = buyProduct.buyProduct_no) as adminOrderList
+   </select>
+   
+   <update id="AdminRefundnExchangeChecked">
+      update RefundnExchanges set refundnExchange_isChecked = 'Y' where refundnExchange_no = #{no}
+   </update>
+   <update id="AdmiPaymentChecked">
+      update Payments set payment_isChecked = 'Y' where payment_no = #{no}
+   </update>
+   
+</mapper>	

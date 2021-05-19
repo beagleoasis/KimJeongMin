@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.cambak21.mappers.cambakMain.CambakMainPageMapper">
+
+	
+	
+<!-- ===========================효원 매퍼 ============================================================================= -->	
+<!-- 	랜덤 캠핑장 3곳 조회 -->
+	<select id="randomCapingsite" resultType="com.cambak21.domain.CampingVO">
+		SELECT * FROM Campings where camping_firstImageUrl is not null ORDER BY RAND() limit 3
+	</select>
+
+<!-- 	메인페이지에 캠핑 리뷰 게시판의 최신 게시글 5개 출력 -->
+	<select id="readNoticeReview" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where board_category = 'notice' order by board_writeDate desc limit 0, 5
+	</select>
+
+<!-- 	메인페이지에 캠핑팁 게시판의 최신 게시글 5개 출력 -->
+	<select id="readRecentTip" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where board_category = 'Tip' order by board_writeDate desc limit 0, 5
+	</select>
+	
+<!-- 	메인페이지에 캠박마켓 게시판의 최신 게시글 5개 출력 -->
+	<select id="readRecentResell" resultType="com.cambak21.domain.ResellBoardVO">
+		select * from ResellBoards order by resellBoard_postDate desc limit 0, 5
+	</select>
+	
+<!-- 	메인페이지에 Q&A 게시판의 최신 게시글 5개 출력 -->
+	<select id="readRecentQA" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where board_category = 'QA' order by board_writeDate desc limit 0, 5
+	</select>
+	
+<!-- 	메인페이지 자동검색 -->
+	<select id="autoSearch" resultType="String">
+		select camping_facltNm from Campings where camping_facltNm like concat('%', #{searchWord} ,'%') or camping_lineIntro like concat('%', #{searchWord} ,'%') 
+		or camping_facltDivNm like concat('%', #{searchWord} ,'%') or camping_mangeDivNm like concat('%', #{searchWord} ,'%') 
+		or camping_featureNm like concat('%', #{searchWord} ,'%') or camping_induty like concat('%', #{searchWord} ,'%') or camping_lctCl like concat('%', #{searchWord} ,'%') 
+		or camping_addr1 like concat('%', #{searchWord} ,'%') or camping_resveCl like concat('%', #{searchWord} ,'%') or camping_glampInnerFclty like concat('%', #{searchWord} ,'%') 
+		or camping_operPdCl like concat('%', #{searchWord} ,'%') or camping_operDeCl like concat('%', #{searchWord} ,'%') or camping_sbrsCl like concat('%', #{searchWord} ,'%') 
+		or camping_sbrsEtc like concat('%', #{searchWord} ,'%') or camping_posblFcltyCl like concat('%', #{searchWord} ,'%') or camping_posblFcltyEtc like concat('%', #{searchWord} ,'%')
+		or camping_themaEnvrnCl like concat('%', #{searchWord} ,'%') or camping_eqpmnLendCl like concat('%', #{searchWord} ,'%') or camping_animalCmgCl like concat('%', #{searchWord} ,'%')
+		limit 10
+	</select>
+	
+<!-- ===========================효원 매퍼 끝============================================================================= -->
+		
+<!-- ===========================도연 매퍼 ============================================================================= -->
+	<select id="getCampings" resultType="com.cambak21.domain.CampingVO">
+		select * from Campings where camping_facltNm like concat('%', #{searchWord} ,'%') or camping_lineIntro like concat('%', #{searchWord} ,'%') 
+		or camping_facltDivNm like concat('%', #{searchWord} ,'%') or camping_mangeDivNm like concat('%', #{searchWord} ,'%') 
+		or camping_featureNm like concat('%', #{searchWord} ,'%') or camping_induty like concat('%', #{searchWord} ,'%') or camping_lctCl like concat('%', #{searchWord} ,'%') 
+		or camping_addr1 like concat('%', #{searchWord} ,'%') or camping_resveCl like concat('%', #{searchWord} ,'%') or camping_glampInnerFclty like concat('%', #{searchWord} ,'%') 
+		or camping_operPdCl like concat('%', #{searchWord} ,'%') or camping_operDeCl like concat('%', #{searchWord} ,'%') or camping_sbrsCl like concat('%', #{searchWord} ,'%') 
+		or camping_sbrsEtc like concat('%', #{searchWord} ,'%') or camping_posblFcltyCl like concat('%', #{searchWord} ,'%') or camping_posblFcltyEtc like concat('%', #{searchWord} ,'%')
+		or camping_themaEnvrnCl like concat('%', #{searchWord} ,'%') or camping_eqpmnLendCl like concat('%', #{searchWord} ,'%') or camping_animalCmgCl like concat('%', #{searchWord} ,'%')
+		order by camping_contentId, camping_addr1 asc limit #{pageStart}, #{perPageNum}
+	</select>
+	
+	<select id="getTotCnt" resultType="int">
+		select count(*) from Campings where camping_facltNm like concat('%', #{searchWord} ,'%') or camping_lineIntro like concat('%', #{searchWord} ,'%') 
+		or camping_facltDivNm like concat('%', #{searchWord} ,'%') or camping_mangeDivNm like concat('%', #{searchWord} ,'%') 
+		or camping_featureNm like concat('%', #{searchWord} ,'%') or camping_induty like concat('%', #{searchWord} ,'%') or camping_lctCl like concat('%', #{searchWord} ,'%') 
+		or camping_addr1 like concat('%', #{searchWord} ,'%') or camping_resveCl like concat('%', #{searchWord} ,'%') or camping_glampInnerFclty like concat('%', #{searchWord} ,'%') 
+		or camping_operPdCl like concat('%', #{searchWord} ,'%') or camping_operDeCl like concat('%', #{searchWord} ,'%') or camping_sbrsCl like concat('%', #{searchWord} ,'%') 
+		or camping_sbrsEtc like concat('%', #{searchWord} ,'%') or camping_posblFcltyCl like concat('%', #{searchWord} ,'%') or camping_posblFcltyEtc like concat('%', #{searchWord} ,'%')
+		or camping_themaEnvrnCl like concat('%', #{searchWord} ,'%') or camping_eqpmnLendCl like concat('%', #{searchWord} ,'%') or camping_animalCmgCl like concat('%', #{searchWord} ,'%')
+	</select>
+	
+	<select id="getTotBoardCnt" resultType="int">
+			select count(*) from Boards
+			<if test='flag == 3'>
+				where (board_category = 'QA' and board_title like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'QA' and  board_content like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'QA' and member_id like concat('%', #{searchWord} ,'%'))
+			</if>
+			<if test='flag == 5'>
+				where (board_category = 'Tip' and board_title like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'Tip' and  board_content like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'Tip' and member_id like concat('%', #{searchWord} ,'%'))
+			</if>
+			<if test='flag == 6'>
+				where (board_category = 'notice' and board_title like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'notice' and  board_content like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'notice' and member_id like concat('%', #{searchWord} ,'%'))
+			</if>
+			<if test='flag == 7'>
+				where (board_category = 'CS' and board_title like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'CS' and  board_content like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'CS' and member_id like concat('%', #{searchWord} ,'%'))
+			</if>
+	</select>
+	
+	<select id="getBoards" resultType="com.cambak21.domain.BoardVO">
+			select * from Boards
+			<if test='flag == 3'>
+				where (board_category = 'QA' and board_title like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'QA' and  board_content like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'QA' and member_id like concat('%', #{searchWord} ,'%'))
+			</if>
+			<if test='flag == 5'>
+				where (board_category = 'Tip' and board_title like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'Tip' and  board_content like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'Tip' and member_id like concat('%', #{searchWord} ,'%'))
+			</if>
+			<if test='flag == 6'>
+				where (board_category = 'notice' and board_title like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'notice' and  board_content like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'notice' and member_id like concat('%', #{searchWord} ,'%'))
+			</if>
+			<if test='flag == 7'>
+				where (board_category = 'CS' and board_title like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'CS' and  board_content like concat('%', #{searchWord} ,'%')) or 
+				(board_category = 'CS' and member_id like concat('%', #{searchWord} ,'%'))
+			</if>
+			
+			order by board_writeDate limit #{pageStart}, #{perPageNum}			
+	</select>
+	
+
+
+
+
+
+
+<!-- ===========================도연 매퍼 끝============================================================================= -->
+
+<!-- ===========================정민 매퍼 ============================================================================= -->	
+<select id="getCampingDetail" resultType="com.cambak21.domain.CampingVO">
+	select * from Campings where camping_contentId = #{camping_contentId}
+</select>
+
+<!-- ===========================정민 매퍼 끝============================================================================= -->		
+	
+</mapper>

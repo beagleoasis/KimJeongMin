@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.cambak21.mappers.cambakMallMapper">
+  	<!-- 김대기 맵퍼 -->
+  	<!-- 주소록 리스트 가져오는 셀렉트 문 -->
+  	<select id="destinationSelect" resultType="com.cambak21.domain.DestinationVO">
+  		select * from goot6.Destinations where member_id = #{member_id} and destination_isDelete = 'N'
+  	</select>
+  	<!-- 한개 주소록 -->
+  	<select id="selectDestOne" resultType="com.cambak21.domain.DestinationVO">
+  		select * from goot6.Destinations where destination_no = #{destination_no} and destination_isDelete = 'N'
+  	</select>
+  	<!-- 기본 주소록 -->
+  	<select id="defaultDest" resultType="com.cambak21.domain.DestinationVO">
+  		select * from goot6.Destinations where member_id = #{member_id} and destination_no = default_address and destination_isDelete = 'N'
+  	</select>
+  	
+  	
+  	<!-- 장원영 맵퍼 -->
+  	<select id="bucketInfoSelect" resultType="com.cambak21.domain.ProdInfoVO">
+		select bp.buyProduct_no, p.product_name, p.product_img1, bp.buyProduct_qty, p.product_sellPrice, bp.buyProduct_deliveriPay, bp.buyProduct_totPrice, m.member_id
+		from BuyProducts bp inner join Members m inner join Products p inner join Buckets b
+		on bp.member_id = m.member_id and bp.product_id = p.product_id and b.member_id = m.member_id
+		where bp.member_id = #{member_id} and bp.buyProduct_isFinished = 'N' and b.bucket_isDelete = 'N' and b.bucket_isChecked = 'Y' group by buyProduct_no
+  	</select>
+  	
+  	<select id="viewPoint" resultType="com.cambak21.domain.PointVO">
+  		select member_totPoint from Members where member_id = #{member_id};
+  	</select>
+  	
+  	<select id="usePoint" resultType="com.cambak21.domain.PointVO">
+ 		insert into Points (buyProduct_no, member_id, grade_name, buyProduct_totPrice, point_reason, point_usedPoint, point_futurePoint, payment_date)
+		values (#{buyProduct_no}, #{member_id}, #{grade_name}, #{buyProduct_totPrice}, #{point_reason}, #{point_usedPoint}, #{point_futurePoint}, #{payment_date});
+  	</select>
+
+	<insert id="payInfoInsert">
+			insert into goot6.PayInfos(member_id, payInfo_way) values(#{member_id}, #{payInfo_way})
+	</insert>
+	
+	<select id="payInfoNo" resultType="int">
+		select max(payInfo_no) from PayInfos
+	</select>
+ 
+	<select id="readSerialNo" resultType="int">
+		select max(payment_serialNo) from Payments
+	</select>
+	
+	<insert id="orderInfoSave">
+		insert into Payments (payment_no, member_id, payInfo_no, destination_no, buyProduct_no, payment_date, payment_deliveryMsg) values (#{payment_no}, #{member_id}, #{payInfo_no}, #{destination_no}, #{buyProduct_no}, #{payment_date}, #{payment_deliveryMsg})
+	</insert>
+	
+	<select id="searchProductNo" resultType="com.cambak21.domain.changeStockVO">
+		select product_id, buyProduct_qty from BuyProducts where buyProduct_no = #{buyProduct_no}
+	</select>
+	
+	<update id="updateStockNum">
+		update Products set product_saleQty = product_saleQty + #{buyProduct_qty}, product_totQty = product_totQty - #{buyProduct_qty} where product_id = #{product_id}
+	</update>
+	
+	<insert id="makeDeliveryInfo">
+		insert into Deliveries (payment_serialNo) value (#{payment_serialNo})
+	</insert>
+	
+	<insert id="savePointHistory">
+		insert into Points (member_id, grade_name, point_reason, point_usedPoint, point_futurePoint, payment_date) values (#{member_id}, #{grade_name}, '상품구매', #{point_usedPoint}, #{point_futurePoint}, #{payment_date})
+	</insert>
+	
+	<update id="deleteBucketHistory">
+		update Buckets set bucket_isDelete = 'Y' where member_id = #{member_id} and bucket_isChecked = 'Y'
+	</update>
+	
+	<update id="updateOrderFinish">
+		update BuyProducts set buyProduct_isFinished = 'Y' where buyProduct_no = #{buyProduct_no}
+	</update>
+	
+	<select id="orderCompleteInfoVO" resultType="com.cambak21.domain.orderCompleteInfoVO">
+		select distinct * from 
+		(select d.destination_toUser, d.destination_mobile, d.destination_zipCode, d.destination_address, d.destination_addressDetail, p.payInfo_way, p.payInfo_date
+		from Payments pay, Destinations d, PayInfos p where pay.destination_no = d.destination_no and pay.payInfo_no = p.payInfo_no
+		and pay.payment_no = #{payment_no}) as lst
+	</select>
+	
+	<update id="controllTotPoint">
+		update Members set member_totPoint = member_totPoint - #{usePointNum} where member_id = #{member_id}
+	</update>
+	
+	<select id="refreshLoginMember" resultType="com.cambak21.domain.MemberVO">
+		select mem.member_id, mem.member_password, mem.grade_name, mem.member_name, mem.member_gender, mem.member_birth, mem.member_postCode, mem.member_addr, mem.member_addrDetail, mem.member_email, mem.member_mobile, mem.member_img, mem.member_payment, mem.member_isAdmin, mem.member_totPoint, mem.member_isDelete, mem.member_cookie, mem.member_cookieAge, mem.member_registerDate from Members mem, Payments pay where mem.member_id = pay.member_id and pay.payment_no = #{payment_no} group by member_id
+	</select>
+	
+  	<!-- 김도연 맵퍼 -->
+  	<select id="getProdDetail" resultType="com.cambak21.domain.ProductsVO">
+  		select * from Products where product_id = #{product_id}
+  	</select>
+  	
+  	<select id="checkBucket" resultType="com.cambak21.domain.BucketVO">
+  		select * from Buckets where member_id = #{member_id} and product_id = #{product_id} and bucket_isDelete = 'N'
+
+  	</select>
+  	
+  	<insert id="insertBucket">
+  		insert into Buckets(member_id, product_id, bucket_buyQty, bucket_sellPrice, bucket_totBuyPrice)
+		value(#{member_id}, #{product_id}, #{bucket_buyQty}, #{bucket_sellPrice}, #{bucket_sellPrice})
+  	</insert>
+  	
+  	<update id="updateBucketQty">
+  		update Buckets 
+  		set bucket_buyQty = #{bucket_buyQty}, bucket_totBuyPrice = #{bucket_totBuyPrice}
+  		where member_id = #{member_id}  
+  		
+  		<if test="bucket_no != 0">
+  			and bucket_no = #{bucket_no}
+  		</if>
+  		<if test="bucket_no == 0">
+  			and product_id = #{product_id} and bucket_isDelete = 'N'
+  		</if>
+  	</update>
+  	
+  	<select id="checkBucketQty" resultType="int">
+  		select count(*) from Buckets where member_id = #{member_id} and bucket_isDelete = 'N'
+  	</select>
+  	
+  	<select id="checkNonUserBucket" resultType="com.cambak21.domain.NonUserBucketVO">
+  		select * from NonUserBuckets where nonUserBucket_ssid = #{nonUserBucket_ssid} and product_id = #{product_id}
+  	</select>
+  	
+  	<select id="checkNonUserBucketQty" resultType="int">
+  		select count(*) from NonUserBuckets where nonUserBucket_ssid = #{nonUserBucket_ssid}
+  	</select>
+  	
+  	<insert id="insertNonUserBucket">
+  		insert into NonUserBuckets(nonUserBucket_ssid, product_id, nonUserBucket_buyQty, nonUserBucket_sellPrice, nonUserBucket_totBuyPrice)
+		value(#{nonUserBucket_ssid}, #{product_id}, #{nonUserBucket_buyQty}, #{nonUserBucket_sellPrice}, #{nonUserBucket_totBuyPrice})
+  	</insert>
+  	
+  	<update id="updateNonUserBucketQty">
+  		update NonUserBuckets 
+  		set nonUserBucket_buyQty = #{nonUserBucket_buyQty}, nonUserBucket_totBuyPrice = #{nonUserBucket_totBuyPrice}
+  		where nonUserBucket_ssid = #{nonUserBucket_ssid} and nonUserBucket_no = #{nonUserBucket_no}
+  	</update>
+  	
+  	<select id="getTopReview" resultType="com.cambak21.dto.mallMainTopCountDTO">
+  		select avg(pr.prodReview_grade) as star, pr.product_id, p.product_name, p.product_sellPrice, p.product_img1 from ProdReviews pr, 
+  		Products p where pr.product_id = p.product_id group by pr.product_id order by star desc limit 0, 4
+  	</select>
+  	
+  	<update id="updateAddBucketQty">
+  		update Buckets 
+  		set bucket_buyQty = bucket_buyQty + #{bucket_buyQty}, bucket_totBuyPrice = bucket_totBuyPrice + #{bucket_totBuyPrice}
+  		where member_id = #{member_id} and product_id = #{product_id} and bucket_isDelete = 'N'
+  	</update>
+  	
+  	<!-- 김정민 맵퍼 -->
+  	
+  	
+  	<!-- 김태훈 맵퍼 -->
+	  	<select id="prodBoardReadAll" resultType="com.cambak21.domain.ProductsVO">
+	  	select * from Products where product_show="Y" order by product_id desc limit #{pageStart}, #{perPageNum};
+	  </select>
+	  
+	  
+	  <select id="prodBoardReadAllCnt" resultType="int">
+	  	select count(*) from Products where product_show="Y"
+	  </select>
+	  
+	  <select id="prodBoardRead" resultType="com.cambak21.domain.ProductsVO">
+  	select * from Products where
+  	<if test="searchType == 'product_name'">
+  			product_name like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'product_title'">
+  			product_title like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'product_detail'">
+  			product_detail like concat('%',#{searchWord},'%')
+  	</if>
+  	and product_show="Y" order by product_id desc limit #{pageStart}, #{perPageNum};
+  </select>
+  
+  	<select id="prodBoardReadCnt" resultType="int">
+  	select count(*)  from Products where
+  <if test="searchType == 'product_name'">
+  			product_name like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'product_title'">
+  			product_title like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'product_detail'">
+  			product_detail like concat('%',#{searchWord},'%')
+  	</if>
+  	and product_show="Y" limit #{pageStert} ,#{pageNum}
+  </select>
+  
+<select id="prodBoardSearch" resultType="com.cambak21.domain.ProductsVO">
+	  	select * from Products where
+  	<if test="searchType == 'product_name'">
+  			product_name like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'product_title'">
+  			product_title like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'product_detail'">
+  			product_detail like concat('%',#{searchWord},'%')
+  	</if>
+  	and product_show="Y" order by
+  	<!-- 기본 가격순 -->
+  	<if test="optionType == 'defualt'">
+  		product_id desc
+  	</if>
+  	<!-- 높은 가격순 -->
+  	<if test="optionType == 'product_sellPrice_desc'">
+  		product_sellPrice desc
+  	</if>
+  	<!-- 낮은 가격순 -->
+  	<if test="optionType == 'product_sellPrice'">
+  		product_sellPrice
+  	</if>
+  	limit #{pageStert} ,#{pageNum}	
+</select>
+
+  	<select id="prodBoardSearchId" resultType="int">
+  	select count(*)  from Products where
+  <if test="searchType == 'product_name'">
+  			product_name like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'product_title'">
+  			product_title like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'product_detail'">
+  			product_detail like concat('%',#{searchWord},'%')
+  	</if>
+  	and product_show="Y"
+  </select>
+  	<!-- 백승권 맵퍼 -->
+  	
+  	
+  	<!-- 서효원 맵퍼 -->
+  	
+	<!--   	캠박몰 카테고리 리스트 페이지 출력 -->
+  	<select id="prodCategoryList" resultType="com.cambak21.domain.ProductDetailListVO">
+  	select prod.product_id, maincg.mainCategory_content, middlecg.middleCategory_content, prod.product_name, prod.product_sellPrice, prod.product_date, prod.product_img1, prod.product_prodAvgScore, prod.product_totQty, prod.product_popularProduct
+	from MainCategories maincg, MiddleCategories middlecg, Products prod where maincg.mainCategory_id = middlecg.mainCategory_id and prod.mainCategory_id = maincg.mainCategory_id and prod.middleCategory_id = middlecg.middleCategory_id and prod.product_show = 'Y'
+	
+	<if test="mainCategory_id != 0 and middleCategory_id != 0">
+	and maincg.mainCategory_id = #{mainCategory_id} and middlecg.middleCategory_id = #{middleCategory_id}
+	</if>
+	
+	<if test="priceRangeOrder == 'less'">
+		and prod.product_sellPrice <![CDATA[<=]]> 50000
+	</if>
+	<if test="priceRangeOrder == 'avg' || priceRangeOrder == 'avgInput'">
+		and prod.product_sellPrice <![CDATA[>=]]> #{minPrice} and prod.product_sellPrice <![CDATA[<=]]> #{maxPrice}
+	</if>
+	<if test="priceRangeOrder == 'great'">
+		and prod.product_sellPrice <![CDATA[>=]]> 1000000
+	</if>
+	
+	<if test="ratingSorter == 'true'">
+		and prod.product_prodAvgScore = #{prodScore}
+	</if>
+	
+	<if test="prodRankOrder == 'cmRank'">
+		order by prod.product_saleQty desc, prod.product_prodAvgScore desc
+	</if>
+	<if test="prodRankOrder == 'rwPd'">
+		order by prod.product_sellPrice asc
+	</if>
+	<if test="prodRankOrder == 'hhPd'">
+		order by prod.product_sellPrice desc
+	</if>
+	<if test="prodRankOrder == 'datePd'">
+		order by prod.product_date desc
+	</if>
+	
+	 limit #{pageStart}, #{perPageNum}
+  	</select>
+  	
+  	<!--   	캠박몰 리뷰 개수 순 리스트 페이지 출력 -->
+  	<select id="prodCategoryReviewOrder" resultType="com.cambak21.domain.ProductDetailListVO">
+  	select * from Products as prod left join 
+  	(select pr.product_id, count(pr.product_id) as p_review from Products p inner join ProdReviews pr on pr.product_id = p.product_id group by pr.product_id) as num
+	on prod.product_id = num.product_id	inner join MainCategories mc on prod.mainCategory_id = mc.mainCategory_id inner join MiddleCategories mic on prod.middleCategory_id = mic.middleCategory_id
+	
+	<if test="mainCategory_id != 0 and middleCategory_id != 0">
+	where mc.mainCategory_id = #{mainCategory_id} and mic.middleCategory_id = #{middleCategory_id}
+	</if>
+	
+	<if test="priceRangeOrder == 'less'">
+		and prod.product_sellPrice <![CDATA[<=]]> 50000
+	</if>
+	<if test="priceRangeOrder == 'avg' || priceRangeOrder == 'avgInput'">
+		and prod.product_sellPrice <![CDATA[>=]]> #{minPrice} and prod.product_sellPrice <![CDATA[<=]]> #{maxPrice}
+	</if>
+	<if test="priceRangeOrder == 'great'">
+		and prod.product_sellPrice <![CDATA[>=]]> 1000000
+	</if>
+	
+	<if test="ratingSorter == 'true'">
+		and prod.product_prodAvgScore = #{prodScore}
+	</if>
+	
+	group by prod.product_id order by p_review desc limit #{pageStart}, #{perPageNum}
+	
+  	</select>
+  	
+  	<!--   	캠박몰 카테고리 리스트 페이지 결과 개수 출력 -->
+  	<select id="prodCategoryNum" resultType="int">
+  	select count(*)
+	from MainCategories maincg, MiddleCategories middlecg, Products prod where maincg.mainCategory_id = middlecg.mainCategory_id and prod.mainCategory_id = maincg.mainCategory_id and prod.middleCategory_id = middlecg.middleCategory_id and prod.product_show = 'Y'
+	
+	<if test="mainCategory_id != 0 and middleCategory_id != 0">
+	and maincg.mainCategory_id = #{mainCategory_id} and middlecg.middleCategory_id = #{middleCategory_id}
+	</if>
+	
+	<if test="priceRangeOrder == 'less'">
+		and prod.product_sellPrice <![CDATA[<=]]> 50000
+	</if>
+	<if test="priceRangeOrder == 'avg' || priceRangeOrder == 'avgInput'">
+		and prod.product_sellPrice <![CDATA[>=]]> #{minPrice} and prod.product_sellPrice <![CDATA[<=]]> #{maxPrice}
+	</if>
+	<if test="priceRangeOrder == 'great'">
+		and prod.product_sellPrice <![CDATA[>=]]> 1000000
+	</if>
+	
+	<if test="ratingSorter == 'true'">
+		and prod.product_prodAvgScore = #{prodScore}
+	</if>
+  	</select>
+  	
+  	<!--   	캠박몰 리뷰 개수 순 리스트 페이지 결과 개수 출력 -->
+  	<select id="prodCategoryReviewOrderNum" resultType="int">
+	select count(*) from (select count(*) from Products as prod left join (
+	select pr.product_id, count(pr.product_id) as p_review from Products p inner join ProdReviews pr on pr.product_id = p.product_id group by pr.product_id) as num
+	on prod.product_id = num.product_id inner join MainCategories mc on prod.mainCategory_id = mc.mainCategory_id inner join MiddleCategories mic on prod.middleCategory_id = mic.middleCategory_id	
+	
+	<if test="mainCategory_id != 0 and middleCategory_id != 0">
+	where mc.mainCategory_id = #{mainCategory_id} and mic.middleCategory_id = #{middleCategory_id}
+	</if>
+	
+	<if test="priceRangeOrder == 'less'">
+		and prod.product_sellPrice <![CDATA[<=]]> 50000
+	</if>
+	<if test="priceRangeOrder == 'avg' || priceRangeOrder == 'avgInput'">
+		and prod.product_sellPrice <![CDATA[>=]]> #{minPrice} and prod.product_sellPrice <![CDATA[<=]]> #{maxPrice}
+	</if>
+	<if test="priceRangeOrder == 'great'">
+		and prod.product_sellPrice <![CDATA[>=]]> 1000000
+	</if>
+	
+	<if test="ratingSorter == 'true'">
+		and prod.product_prodAvgScore = #{prodScore}
+	</if>
+	
+	group by prod.product_id order by p_review desc) reviewNum
+	
+  	</select>
+	
+	<!--   	캠박몰 상품 검색 결과 리스트 페이지 출력 -->
+  	<select id="prodSearchList" resultType="com.cambak21.domain.ProductDetailListVO">
+  	select prod.product_id, maincg.mainCategory_content, middlecg.middleCategory_content, prod.product_name, prod.product_sellPrice, prod.product_date, prod.product_img1, prod.product_prodAvgScore, prod.product_totQty, prod.product_popularProduct
+	from MainCategories maincg, MiddleCategories middlecg, Products prod where maincg.mainCategory_id = middlecg.mainCategory_id and prod.mainCategory_id = maincg.mainCategory_id and prod.middleCategory_id = middlecg.middleCategory_id and prod.product_show = 'Y'
+	
+	<if test="priceRangeOrder == 'less'">
+		and prod.product_sellPrice <![CDATA[<=]]> 50000
+	</if>
+	<if test="priceRangeOrder == 'avg' || priceRangeOrder == 'avgInput'">
+		and prod.product_sellPrice <![CDATA[>=]]> #{minPrice} and prod.product_sellPrice <![CDATA[<=]]> #{maxPrice}
+	</if>
+	<if test="priceRangeOrder == 'great'">
+		and prod.product_sellPrice <![CDATA[>=]]> 1000000
+	</if>
+	
+	<if test="ratingSorter == 'true'">
+		and prod.product_prodAvgScore = #{prodScore}
+	</if>
+	
+	and prod.product_name like concat('%',#{keyword},'%') group by prod.product_id
+	
+	<if test="prodRankOrder == 'cmRank'">
+		order by prod.product_saleQty desc, prod.product_prodAvgScore desc
+	</if>
+	<if test="prodRankOrder == 'rwPd'">
+		order by prod.product_sellPrice asc
+	</if>
+	<if test="prodRankOrder == 'hhPd'">
+		order by prod.product_sellPrice desc
+	</if>
+	<if test="prodRankOrder == 'datePd'">
+		order by prod.product_date desc
+	</if>
+	
+	 limit #{pageStart}, #{perPageNum}
+  	</select>
+  	
+  	<!--   	캠박몰 상품 검색 결과 리스트 페이지 결과 개수 출력 -->
+  	<select id="prodSearchNum" resultType="int">
+  	select count(*) from ( select prod.product_id, maincg.mainCategory_content, middlecg.middleCategory_content, prod.product_name, prod.product_sellPrice, prod.product_img1, prod.product_prodAvgScore from
+	MainCategories maincg, MiddleCategories middlecg, Products prod where maincg.mainCategory_id = middlecg.mainCategory_id and prod.mainCategory_id = maincg.mainCategory_id and prod.middleCategory_id = middlecg.middleCategory_id and prod.product_show = 'Y'
+	
+	<if test="priceRangeOrder == 'less'">
+		and prod.product_sellPrice <![CDATA[<=]]> 50000
+	</if>
+	<if test="priceRangeOrder == 'avg' || priceRangeOrder == 'avgInput'">
+		and prod.product_sellPrice <![CDATA[>=]]> #{minPrice} and prod.product_sellPrice <![CDATA[<=]]> #{maxPrice}
+	</if>
+	<if test="priceRangeOrder == 'great'">
+		and prod.product_sellPrice <![CDATA[>=]]> 1000000
+	</if>
+	
+	<if test="ratingSorter == 'true'">
+		and prod.product_prodAvgScore = #{prodScore}
+	</if>
+	
+	and prod.product_name like concat('%',#{keyword},'%') group by prod.product_id) as searchResult
+	
+  	</select>
+  	
+  	<!--   	캠박몰 상품 검색 결과 리뷰 개수 순 리스트 페이지 출력 -->
+  	<select id="prodCategorySearchReviewOrder" resultType="com.cambak21.domain.ProductDetailListVO">
+  	select * from Products as prod left join 
+  	(select pr.product_id, count(pr.product_id) as p_review from Products p inner join ProdReviews pr on pr.product_id = p.product_id group by pr.product_id) as num
+	on prod.product_id = num.product_id	inner join MainCategories mc on prod.mainCategory_id = mc.mainCategory_id inner join MiddleCategories mic on prod.middleCategory_id = mic.middleCategory_id
+	
+	where prod.product_name like concat('%',#{keyword},'%') and prod.product_show = 'Y'
+	
+	<if test="priceRangeOrder == 'less'">
+		and prod.product_sellPrice <![CDATA[<=]]> 50000
+	</if>
+	<if test="priceRangeOrder == 'avg' || priceRangeOrder == 'avgInput'">
+		and prod.product_sellPrice <![CDATA[>=]]> #{minPrice} and prod.product_sellPrice <![CDATA[<=]]> #{maxPrice}
+	</if>
+	<if test="priceRangeOrder == 'great'">
+		and prod.product_sellPrice <![CDATA[>=]]> 1000000
+	</if>
+	
+	<if test="ratingSorter == 'true'">
+		and prod.product_prodAvgScore = #{prodScore}
+	</if>
+	
+	group by prod.product_id order by p_review desc limit #{pageStart}, #{perPageNum}
+	
+  	</select>
+  	
+  	<!--   	캠박몰 상품 검색 결과 리뷰 개수 순 리스트 페이지 결과 개수 출력 -->
+  	<select id="prodCategorySearchReviewOrderNum" resultType="int">
+	select count(*) from (select count(*) from Products as prod left join (
+	select pr.product_id, count(pr.product_id) as p_review from Products p inner join ProdReviews pr on pr.product_id = p.product_id group by pr.product_id) as num
+	on prod.product_id = num.product_id inner join MainCategories mc on prod.mainCategory_id = mc.mainCategory_id inner join MiddleCategories mic on prod.middleCategory_id = mic.middleCategory_id
+	
+	where prod.product_name like concat('%',#{keyword},'%') and prod.product_show = 'Y'
+	
+	<if test="priceRangeOrder == 'less'">
+		and prod.product_sellPrice <![CDATA[<=]]> 50000
+	</if>
+	<if test="priceRangeOrder == 'avg' || priceRangeOrder == 'avgInput'">
+		and prod.product_sellPrice <![CDATA[>=]]> #{minPrice} and prod.product_sellPrice <![CDATA[<=]]> #{maxPrice}
+	</if>
+	<if test="priceRangeOrder == 'great'">
+		and prod.product_sellPrice <![CDATA[>=]]> 1000000
+	</if>
+	
+	<if test="ratingSorter == 'true'">
+		and prod.product_prodAvgScore = #{prodScore}
+	</if>
+	
+	group by prod.product_id order by p_review desc) as searchResult
+	
+  	</select>
+  	
+  	<!--   	캠박몰 상품 리스트 페이지 상품의 리뷰 개수 출력 -->
+  	<select id="getProductReviewNum" resultType="int">
+  		select count(*) as prouctReview_count from ProdReviews where product_id = #{product_id} and prodReview_isDelete = 'N'
+  	</select>
+  	
+  	<!--   	캠박몰 인기 상품 6개 출력 -->
+  	<select id="popularProdList" resultType="com.cambak21.domain.ProductDetailListVO">
+  		select product_id, product_img1 from Products where product_popularProduct = 'Y' ORDER BY RAND() limit 0, 6
+  	</select>
+  	
+  	<!-- 박종진 맵퍼 -->
+  	
+  	<select id="destinationsListAjax" resultType="com.cambak21.domain.DestinationVO">
+  		select * from goot6.Destinations where member_id = #{member_id} and destination_isDelete = "N"
+  	</select>
+  	
+  	<update id="defaultModyAjax" >
+  		update Destinations set default_address = #{destination_no} where member_id = #{member_id} 
+  	</update>
+  	
+  	<update id="destiModyAjax">
+  		update Destinations set destination_nickname = #{destination_nickname}, destination_address = #{destination_address}, destination_addressDetail = #{destination_addressDetail}, destination_updateDate = now(), destination_toUser = #{destination_toUser}, destination_mobile = #{destination_mobile}, destination_zipCode = #{destination_zipCode} where destination_no = #{destination_no}    
+  	</update>
+  	
+  	<insert id="insertDestiny">
+  		insert into Destinations(member_id, destination_nickname, destination_address, destination_addressDetail, destination_toUser, destination_mobile, destination_zipCode) values(#{member_id}, #{destination_nickname}, #{destination_address}, #{destination_addressDetail}, #{destination_toUser}, #{destination_mobile}, #{destination_zipCode})
+  	</insert>	
+  	
+  	<update id="deleteDestiny">
+  		update Destinations set destination_isDelete = "Y" where destination_no = #{destination_no}
+  	</update>
+  	
+  	<select id="GetModifydst" resultType="com.cambak21.domain.DestinationVO">
+  		select * from Destinations where destination_no = #{dstno}
+  	</select>
+  	
+  	
+  	<!-- 이영광 맵퍼 -->
+  	
+  	
+  </mapper>

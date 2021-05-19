@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.mapper.MemberOrderMapper">
+	<select id="MemberLittleOrder" resultType="com.cambak21.domain.MemberLittleOrderVO">
+	select payment.payment_date,payment.payment_no,
+		product.product_name,buyProduct.buyProduct_totPrice,
+		deliverie.delivery_status,payment.payment_serialNo
+		 from Payments payment
+		 join  BuyProducts buyProduct on payment.buyProduct_no = buyProduct.buyProduct_no
+		 join Products product on buyProduct.product_name = product.product_name
+		 left join Deliveries deliverie on payment.payment_serialNo = deliverie.payment_serialNo
+		 where payment.member_id = #{userName}
+		 order by payment.payment_serialNo
+		 desc limit #{pageStert},#{pageNum};
+	</select>
+	
+	<select id="MemberLittleOrderCnt" resultType="int">
+		select count(*) from
+		(select payment.payment_date,payment.payment_no,
+		product.product_name,buyProduct.buyProduct_totPrice,
+		deliverie.delivery_status
+		 from Payments payment
+		 join  BuyProducts buyProduct on payment.buyProduct_no = buyProduct.buyProduct_no
+		 join Products product on buyProduct.product_name = product.product_name
+		 left join Deliveries deliverie on payment.payment_serialNo = deliverie.payment_serialNo
+		 where payment.member_id = #{userName}
+		 group by payment.payment_serialNo) as OrderList
+	</select>
+	
+	<select id="MemberDetailOrder" resultType="com.cambak21.domain.MemberOrderVO">
+		select payment.payment_no, payment.payment_date ,product.product_name, payment.member_id,destination.destination_address ,destination.destination_toUser ,
+		destination.destination_mobile ,payment.payment_deliveryMsg ,
+		product.product_factory ,poin.point_usedPoint ,buyProduct.buyProduct_deliveriPay,buyProduct.buyProduct_totPrice,
+		poin.point_futurePoint ,
+		deliverie.delivery_status,
+		payInfo.payInfo_way,refundnExchange.refundnExchange_status
+		 from Payments payment
+		join  BuyProducts buyProduct on payment.buyProduct_no = buyProduct.buyProduct_no
+		join Destinations destination on destination.destination_no = payment.destination_no
+		join Products product on buyProduct.product_name = product.product_name
+		join PayInfos payInfo on payInfo.payInfo_no = payment.payInfo_no
+		left join Deliveries deliverie on payment.payment_serialNo = deliverie.payment_serialNo
+		left join RefundnExchanges refundnExchange  on payment.payment_serialNo = refundnExchange.payment_serialNo
+		left join Points poin on poin.buyProduct_no = payment.buyProduct_no
+		join Members member on member.member_id = payment.member_id
+		where payment.member_id = #{userName} and payment.payment_serialNo #{serialNo}
+		group by payment.payment_serialNo
+		order by payment.payment_serialNo
+	</select>
+	
+	<update id="MemberPointAndpaymentUpdate">
+		update Members set 
+		member_totPoint = member_totPoint +
+		<!-- 유저에게 최종으로 포인트 반환 -->
+		if(
+		-- 유저의 등급에 따른 포인트배수 구하기
+		(select V.grade_benefit from(select Grades.grade_benefit from Grades Grades join Members M
+		on M.grade_name = Grades.grade_name where M.member_id = #{userName}) V) =10,
+		
+		<!--  포인트값 반환 -->
+		(select CAST((select (select bucket.bucket_totBuyPrice
+		from  Buckets bucket JOIN Payments payment
+		on payment.buyProduct_no = bucket.bucket_no 
+		where payment.member_id = #{userName})) * 0.1 AS signed integer)),
+		
+		<!-- 위 조건과 틀렸을시 다시 유저의 등급에 따른 포인트배수 구하기 -->
+		if(
+		(select B.grade_benefit from(select Grades.grade_benefit from Grades Grades join Members M
+		on M.grade_name = Grades.grade_name where M.member_id = #{userName}) B) = 5,
+		
+		<!-- 포인트값 반환  -->
+		(select CAST((select (select bucket.bucket_totBuyPrice
+		from  Buckets bucket JOIN Payments payment
+		on payment.buyProduct_no = bucket.bucket_no 
+		where payment.member_id = #{userName})) * 0.05 AS signed integer))
+		,0)) ,
+		<!--총 사용금액 업데이트 -->
+		
+		member_payment = member_payment+
+		(select bucket.bucket_totBuyPrice
+		from  Buckets bucket JOIN Payments payment
+		on payment.buyProduct_no = bucket.bucket_no 
+		where payment.member_id = #{userName})
+		
+		where member_id = #{userName}";
+		
+	</update>
+	
+	<update id="MemeberPointDateUpdate">
+		update Points set point_savingDate = now() where member_id = #{userName};
+	</update>
+	
+	<update id="MemeberGradeUpdate">
+		update Members set
+		grade_name = 
+		if(
+			((select M.member_payment from(select member_payment from Members where member_id = #{userName})M)>= (SELECT grade_highExpendi FROM Grades where grade_name = "A") ) or
+			((select M.member_payment from(select member_payment from Members where member_id = #{userName})M)  >= (SELECT grade_lowExpendi FROM Grades where grade_name = "A")),"A",
+		    if(
+				((select M.member_payment from(select member_payment from Members where member_id = #{userName})M)>= (SELECT grade_highExpendi FROM Grades where grade_name = "B") ) or
+				((select M.member_payment from(select member_payment from Members where member_id = #{userName})M)  >= (SELECT grade_lowExpendi FROM Grades where grade_name = "B")),"B","C"
+		    )
+		)
+		where member_id = #{userName};
+	</update>
+  </mapper>

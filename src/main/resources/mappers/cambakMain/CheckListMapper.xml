@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+    <mapper namespace="com.cambak21.mappers.cambakMain.CheckListMapper">
+    		
+   		<select id="getCheckListAll" resultType="com.cambak21.domain.CheckListVO">
+   			select * from CheckLists where member_id = #{member_id} order by checkList_no asc
+   		</select>
+    		
+    	<update id="changeCheckList" >
+    		update CheckLists set 
+    		
+		 <if test='checkList_checked == "Y"'>
+			checkList_checked = 'N'
+		</if>
+		
+		<if test='checkList_checked == "N"'>
+			checkList_checked = 'Y'
+		</if>
+		 where checkList_no = #{checkList_no} 
+		</update>	
+    	
+    	<delete id="deleteThis">
+    		delete from CheckLists where checkList_no = #{checkList_no}
+    	</delete>
+    	
+    	<insert id="saveList">
+    		insert into CheckLists(member_id, checkList_content) values(#{member_id}, #{checkList_content}) 
+    	</insert>
+    	
+    	<delete id="deleteThisAll" >
+    		delete from CheckLists where checkList_checked = 'Y' and  member_id = #{member_id}
+    	</delete>
+    	
+    	<select id="getChkListYet" resultType="int">
+    		select count(*) from CheckLists where member_id = #{member_id} and checkList_checked = 'N'
+    	</select>
+    	<select id="getChkListAll" resultType="int">
+    		select count(*) from CheckLists where member_id = #{member_id}
+    	</select>
+    	
+    </mapper>

@@ -1,0 +1,167 @@
+.\34 u {
+	width: 100%;
+	margin: 0px;
+}
+
+p.category-title {
+	font-weight: bold;
+	text-align: center;
+	font-size: 20px;
+}
+
+#usr {
+	margin-bottom: 20px;
+}
+
+#content {
+	width: 83%
+}
+
+.pageBtn {
+	display: flex;
+    justify-content: center;
+}
+
+.searchType {
+	height: 35px;
+}
+
+.research {
+    display: flex;
+}
+
+/* ====================================================게시글 상세페이지 ========================================================*/
+.detail-wrap {
+	margin-top: 5%;
+	display: flex;
+	flex-direction: column;
+	border-radius: 10px;
+	width: 100%;
+	height: 100%;
+}
+
+.detail-top {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+}
+
+.detail-top-title {
+	display: flex;
+	border-top: 2px solid lightgray;
+	border-bottom: 2px solid lightgray;
+	background: #fcfcfc;
+}
+
+.detail-top-title p {
+	padding: 15px;
+}
+
+.detail-top-title p:first-child {
+	width: 70%;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.detail-top-title p:last-child {
+	width: 30%;
+	text-align: center;
+}
+
+.detail-top-author {
+	display: flex;
+	border-bottom: 1px solid lightgray;
+}
+
+.detail-top-author p {
+	padding: 10px;
+}
+
+.detail-top-author p span {
+	font-weight: bold;
+}
+
+.detail-top-author > p:first-child {
+	padding-left: 15px;
+	width: 70%;
+}
+
+.detail-top-author > .view, .like, .reply {
+	width: 10%;
+	text-align: center;
+}
+
+.detail-content {
+/* 	display: flex; */
+/* 	justify-content: flex-start; */
+	min-height: 300px;
+	padding: 1.5%;
+}
+
+.recommend-btn {
+	display: flex;
+	justify-content: center;
+	border-top: 1px solid lightgray;
+	margin-top: 15px;
+	margin-bottom: 60px;
+	padding-top: 15px;
+}
+
+.detail-bottom {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+}
+
+.detail-bottom-comment {
+	border-top: 2px solid lightgray;
+	margin-top: 1px;
+	list-style: none;
+	padding-left: 0;
+}
+
+.comment-id {
+	font-weight: bold;
+	padding-bottom: 10px;
+	font-size: 20px;
+}
+
+.comment-content {
+	padding-bottom: 0;
+}
+
+.detail-bottom-comment li {
+	border-bottom: 2px solid lightgray;
+	padding: 10px 0;
+}
+
+.detail-bottom-comment-write {
+	border: 1px solid lightgray;
+	padding: 10px;
+	margin-top: 20px;
+	border-radius: 10px;
+	background: #fcfcfc;
+	margin-bottom: 20px;
+}
+
+button.btn.btn-success {
+	margin-top: 10px;
+    float: right;
+}
+
+.prevNextBtns {
+    display: flex;
+    justify-content: space-between;
+}
+
+button.btn.btn-danger.write {
+    float: right;
+}
+
+.nowSideBar {
+	color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+    font-weight: 500;
+    border-radius: 5px;
+}

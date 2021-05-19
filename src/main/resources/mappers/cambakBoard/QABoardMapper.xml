@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cambak21.mappers.QABoardMapper">
+
+	<!-- 게시글 작성 -->
+	<insert id="insertBoardQA">
+		insert into Boards(member_id, board_title, board_category, board_content)
+		values(#{member_id}, #{board_title}, #{board_category}, #{board_content});
+	</insert>
+	
+	<select id="getBoardNo" resultType="int">
+		select max(board_no) from Boards where member_id = #{member_id}
+	</select>
+
+	<!-- 게시글 수정 -->
+	<update id="updateBoardQA">
+		update Boards 
+		set board_title = #{board_title}, board_content = #{board_content}, board_updateDate = now()
+		where board_no = #{board_no};
+	</update>
+	
+	<!-- 게시글 삭제 -->
+	<delete id="deleteBoardQA">
+		delete from Boards where board_no = #{board_no};
+	</delete>
+	
+	<!-- 게시글 리스트 -->
+	<select id="listBoardQA" resultType="com.cambak21.domain.BoardQAVO">
+		select board_no, b.member_id, board_title, board_content, board_writeDate, board_updateDate, board_likeCnt, board_viewCnt,
+		(select count(*) from ReplyBoards rb where b.board_no = rb.board_no) as board_replyCnt
+		from Boards b
+		where board_category = 'QA'
+		order by board_no desc
+		limit #{pageStart}, #{perPageNum};
+	</select>
+	
+	<!-- 게시글 리스트 cnt -->
+	<select id="totalCnt" resultType="int">
+		select count(*) from Boards where board_category = 'QA';
+	</select>
+	
+	<!-- 조회수 업데이트 -->
+	<update id="updateView">
+		update Boards set board_viewCnt = board_viewCnt + 1 where board_no = #{board_no};
+	</update>
+	
+	<!-- 좋아요 업데이트 -->
+	<update id="updateLike">
+		update Boards set board_likeCnt = board_likeCnt + 1 where board_no = #{board_no};
+	</update>
+	
+	<!-- 검색 리스트 -->
+	<select id="searchBoard" resultType="com.cambak21.domain.BoardQAVO">
+		select * from Boards where board_category = 'QA'
+		<if test="searchType == 'title'">
+			and board_title like concat('%', #{searchWord} ,'%')
+		</if>
+		<if test="searchType == 'content'">
+			and board_content like concat('%', #{searchWord} ,'%')
+		</if>
+		<if test="searchType == 'writer'">
+			and member_id like concat('%', #{searchWord} ,'%')
+		</if>
+		<if test="searchType == 'title+content'">
+			and board_content like concat('%', #{searchWord}, '%')
+			or board_title like concat('%', #{searchWord}, '%')
+		</if>
+		order by board_no desc limit #{pageStart}, #{perPageNum};
+	</select>
+	
+	<!-- 검색 리스트 cnt -->
+	<select id="searchQACnt" resultType="int">
+		select count(*) from Boards where board_category = 'QA'
+		<if test="searchType == 'title'">
+			and board_title like concat('%', #{searchWord} ,'%')
+		</if>
+		<if test="searchType == 'content'">
+			and board_content like concat('%', #{searchWord} ,'%')
+		</if>
+		<if test="searchType == 'writer'">
+			and member_id like concat('%', #{searchWord} ,'%')
+		</if>
+		<if test="searchType == 'title+content'">
+			and board_content like concat('%', #{searchWord}, '%')
+			or board_title like concat('%', #{searchWord}, '%')
+		</if>
+	</select>
+	
+	<!-- 게시글 상세보기 -->
+	<select id="readBoardQA" resultType="com.cambak21.domain.BoardQAVO">
+		select board_no, b.member_id, board_title, board_content, board_writeDate, board_updateDate, board_likeCnt, board_viewCnt,
+		(select count(*) from ReplyBoards rb where b.board_no = rb.board_no) as board_replyCnt
+		from Boards b
+		where board_no = #{board_no};
+	</select>
+
+	<!-- 댓글 갯수(리스트에 출력용) -->
+	<select id="replyCnt" resultType="int">
+		select count(*) from ReplyBoards where board_no = #{board_no};
+	</select>
+	
+	<!-- 	  페이징 #{page}부터 10개씩 출력 -->
+	  <select id="listBoardPaging" resultType="com.cambak21.domain.BoardQAVO">
+	  	select * from tbl_board order by no desc limit #{page}, 10;
+	  </select>
+	  
+	<!-- 	  페이징 제약 조건(PagingCriteria 를 이용한 페이징) -->
+	  <select id="listBoardCriteria" resultType="com.cambak21.domain.BoardQAVO">
+	  	select * from tbl_board order by no desc limit #{pageStart}, #{perPageNum}
+	  </select>
+	  
+	  <select id="getTotalBoardCnt" resultType="int">
+	  	select count(*) from tbl_board
+	  </select>
+
+	<!-- 조회수 -->
+	<update id="viewQACount">
+		update Boards set board_viewCnt = board_viewCnt + 1 where board_no = #{board_no}
+	</update>
+	
+	<!-- 로그인한 회원이 이미 좋아요를 눌렀는지 안눌렀는지 확인 -->
+	<select id="checkLike" resultType="String">
+		select * from LikeBoards where board_no = #{board_no} and member_id = #{member_id};
+	</select>
+	
+	<!-- 상세페이지 들어갔을시 체크여부 가져오기 -->
+	<select id="preCheckLike" resultType="int">
+		select count(*) from LikeBoards where board_no = #{board_no} and member_id = #{member_id};
+	</select>
+	
+	<!-- LikeBoards 테이블에 insert -->
+	<insert id="insertLikeBoards">
+		insert into LikeBoards(member_id, board_no)
+		value(#{member_id}, #{board_no});
+	</insert>
+	
+	<!-- 좋아요 수 + 1 업데이트 -->
+	<update id="updatePlusLike">
+		update Boards set board_likeCnt = board_likeCnt + 1 where board_no = #{board_no};
+	</update>
+	
+	<delete id="deleteLikeBoard">
+		delete from LikeBoards where member_id = #{member_id} and board_no = #{board_no};
+	</delete>
+	
+	<!-- 좋아요 수 - 1 업데이트 -->
+	<update id="updateMinusLike">
+		update Boards set board_likeCnt = board_likeCnt - 1 where board_no = #{board_no};
+	</update>
+	
+	<!-- 좋아요 수 가져오기 -->
+	<select id="getLikeCnt" resultType="int">
+		select board_likeCnt from Boards where board_no = #{board_no};
+	</select>
+	
+</mapper>

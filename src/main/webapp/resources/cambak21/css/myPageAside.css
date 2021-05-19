@@ -1,0 +1,53 @@
+.\34 u {
+   width: 100%;
+}
+
+.profile {
+   box-sizing: border-box;
+   width: 200px;
+   text-align: center;
+   border: 1px solid #F0F2F0;
+   margin-bottom: 120px 50px 0px 0px;
+       
+}
+
+.profileSize {
+   background-color: #F0F2F0;
+   padding: 20px 0px;
+}
+
+.userProfileImg {
+    width: 64px;
+    height: 64px;
+    border-radius: 70%;
+    overflow: hidden;	
+}
+
+.profileEmail {
+    font-size: 13px;
+}
+
+.nav-stacked>li{
+	margin-top: -10px;
+}
+
+.nav>li>a {
+    position: relative;
+    display: block;
+    padding: 5px 15px;
+}
+
+#category-title{
+
+    text-align-last: center;
+    
+    }
+
+.panel-success {
+    margin-top: 25px;
+    border-color: #d6e9c6;
+}
+
+.profileMenu1{
+margin-top: 10px;
+}

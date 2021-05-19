@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cambak21.mapper.BoardHumor">
+	<!-- 게시글 입력  -->
+	<insert id="insertBoardHumor">
+		insert into Boards(member_id, board_title, board_category, board_content) values(#{member_id}, #{board_title}, 'humor', #{board_content})
+	</insert>
+	<!-- 게시물 출력 -->
+	<select id="readBoardHumor" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where board_no = #{board_no}
+	</select>
+	<!-- 게시물 수정 -->
+	<update id="updateBoardHumor">
+		update Boards set board_title = #{board_title}, board_content = #{board_content} where board_no = #{board_no}
+	</update>
+	<!-- 게시물 삭자 -->
+	<delete id="deleteBoardHumor">
+		update Boards set board_isDelete = 'Y' where board_no = #{board_no}
+	</delete>
+	<!-- 게시물 리스트 출력 -->
+	<select id="listBoardHumorCriteria" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where board_category = 'humor' and board_isDelete = 'N' order by board_no desc limit #{pageStart}, #{perPageNum}
+	</select>
+	<!-- 총게시물 수 가져오기 -->
+	<select id="getToatalBoardHumorCnt" resultType="int">
+		select Count(*) from Boards where board_category = 'humor' and board_isDelete = 'N'
+	</select>
+	
+	<!-- 게시물 조회수 가져오기 -->
+	<update id="updateViewCnt">
+		update Boards set board_viewCnt = board_viewCnt + 1 where board_no = #{board_no}
+	</update>
+	<!-- 게시물 검색 수 -->
+	<select id="searchBoardCnt" resultType="int">
+		select count(*) from Boards where (board_title like concat('%', #{searchWord}, '%') or board_content like concat('%', #{searchWord}, '%') or member_id like concat('%', #{searchWord}, '%')) and board_category = 'humor' and board_isDelete = 'N'
+	</select>
+	<!-- 게시물 검색 리스트 -->
+	<select id="searchBoard" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where (board_title like concat('%', #{searchWord}, '%') or board_content like concat('%', #{searchWord}, '%') or member_id like concat('%', #{searchWord}, '%')) and board_category = 'humor' and board_isDelete = 'N' order by board_no desc limit #{pageStart}, #{perPageNum}
+  	</select>
+	<!-- 게시물 댓글수 -->
+	<update id="updateReplyCnt">
+		update Boards set board_replyCnt = board_replyCnt + 1 where board_no = #{board_no}
+	</update>
+	<!-- 게시물 댓글수 빼기 -->
+	<update id="minusReplyCnt">
+		update Boards set board_replyCnt = board_replyCnt - 1 where board_no = #{board_no}
+	</update>
+	
+	<!-- 좋아요 수 + 1 업데이트 -->
+	<update id="updatePlusLike">
+		update Boards set board_likeCnt = board_likeCnt + 1 where board_no = #{board_no};
+	</update>
+	<!-- 좋아요 수 - 1 업데이트 -->
+	<update id="updateMinusLike">
+		update Boards set board_likeCnt = board_likeCnt - 1 where board_no = #{board_no};
+	</update>
+	<!-- 좋아요 수 가져오기 -->
+	<select id="getLikeCnt" resultType="int">
+		select board_likeCnt from Boards where board_no = #{board_no};
+	</select>
+	
+	<!-- LikeBoards 테이블에 insert -->
+	<insert id="insertLikeBoards">
+		insert into LikeBoards(member_id, board_no)
+		value(#{member_id}, #{board_no});
+	</insert>
+	<delete id="deleteLikeBoard">
+		delete from LikeBoards where member_id = #{member_id} and board_no = #{board_no};
+	</delete>
+	<select id="checkLike" resultType="String">
+		select * from LikeBoards where board_no = #{board_no} and member_id = #{member_id};
+	</select>
+	<!-- 상세페이지 들어갔을시 체크여부 가져오기 -->
+	<select id="preCheckLike" resultType="int">
+		select count(*) from LikeBoards where board_no = #{board_no} and member_id = #{member_id};
+	</select>
+</mapper>

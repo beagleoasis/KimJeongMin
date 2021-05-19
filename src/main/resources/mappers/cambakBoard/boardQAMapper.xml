@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.cambak21.mappers.cambakBoard.boardQAMapper">
+  	<!-- prodQA 게시판 전체 목록을 불러오는 쿼리문 -->
+  	<select id="prodQAListAll" resultType="com.cambak21.domain.ProdQAVO">
+  		select * from ProdQAs where product_id = #{product_id} and prodQA_refOrder = #{prodQA_refOrder} and prodQA_isDelete = 'N'
+  		<if test="prodQA_category == '상품'">
+  			and prodQA_category = #{prodQA_category}
+  		</if>
+  		<if test="prodQA_category == '배송'">
+  			and prodQA_category = #{prodQA_category}
+  		</if>
+  		<if test="prodQA_category == '환불'">
+  			and prodQA_category = #{prodQA_category}
+  		</if>
+  		<if test="prodQA_category == '교환'">
+  			and prodQA_category = #{prodQA_category}
+  		</if>
+  		<if test="prodQA_category == '기타'">
+  			and prodQA_category = #{prodQA_category}
+  		</if>
+  		order by ProdQA_ref desc, prodQA_refOrder asc limit #{pageStart}, #{perPageNum}
+  	</select>
+  	
+  	<select id="totalProdQACnt" resultType="int">
+  		select count(*) from ProdQAs where product_id = #{product_id} and prodQA_refOrder = #{prodQA_refOrder} and prodQA_isDelete = 'N'
+  		<if test="prodQA_category == '상품'">
+  			and prodQA_category = #{prodQA_category}
+  		</if>
+  		<if test="prodQA_category == '배송'">
+  			and prodQA_category = #{prodQA_category}
+  		</if>
+  		<if test="prodQA_category == '환불'">
+  			and prodQA_category = #{prodQA_category}
+  		</if>
+  		<if test="prodQA_category == '교환'">
+  			and prodQA_category = #{prodQA_category}
+  		</if>
+  		<if test="prodQA_category == '기타'">
+  			and prodQA_category = #{prodQA_category}
+  		</if>
+  	</select>
+  	
+  	<insert id="insertProdQA">
+  		insert into ProdQAs(product_id, member_id, prodQA_title, prodQA_content, prodQA_ref, prodQA_refOrder, prodQA_step, prodQA_img1, prodQA_isSecret, prodQA_secretPassword, prodQA_category, prodQA_img2, prodQA_img3)
+		values(#{product_id}, #{member_id}, #{prodQA_title}, #{prodQA_content}, #{prodQA_ref}, #{prodQA_refOrder}, #{prodQA_step}, #{prodQA_img1}, #{prodQA_isSecret}, md5(sha1(#{prodQA_secretPassword})), #{prodQA_category}, #{prodQA_img2}, #{prodQA_img3})
+  	</insert>
+  	
+  	<select id="getQANum" resultType="int">
+  		select count(*) from ProdQAs
+  	</select>
+  	
+  	<select id="getMaxNo" resultType="int">
+  		select max(prodQA_no) from ProdQAs
+  	</select>
+  	
+  	<select id="prodQADetail" resultType="com.cambak21.dto.ProdQAUpdateDTO">
+  		select * from ProdQAs where product_id = #{product_id} and prodQA_no = #{prodQA_no}
+  	</select>
+  	
+  	<update id="updateProdQA">
+  		update ProdQAs set prodQA_title = #{prodQA_title}, prodQA_content = #{prodQA_content}, 
+  		prodQA_img1 = #{prodQA_img1}, prodQA_img2 = #{prodQA_img2}, prodQA_img3 = #{prodQA_img3}, prodQA_isSecret = #{prodQA_isSecret}
+		where product_id = #{product_id} and prodQA_no = #{prodQA_no}
+  	</update>
+  	
+  	<select id="checkSecretPwd" resultType="int">
+  		select count(member_id) from ProdQAs where prodQA_secretPassword = md5(sha1(#{prodQA_secretPassword})) and prodQA_no = #{prodQA_no}
+  	</select>
+  	
+  	<update id="deleteProdQA">
+  		update ProdQAs set prodQA_isDelete = 'Y' where prodQA_no = #{prodQA_no}
+  	</update>
+  	
+  	<update id="prodQAViewCnt">
+  		update ProdQAs set prodQA_viewCnt = prodQA_viewCnt + 1 where prodQA_no = #{prodQA_no}
+  	</update>
+  	
+  	<insert id="prodQAInsertLike">
+  		insert into ProdQAsLike(member_id, prodQA_no) 
+  		values(#{member_id}, #{prodQA_no})
+  	</insert>
+  	
+  	<update id="prodQALikeCnt">
+  		update ProdQAs set prodQA_likeCnt = (select count(*) from ProdQAsLike where prodQA_no = #{prodQA_no}) 
+  		where prodQA_no = #{prodQA_no}
+  	</update>
+  	
+  	<delete id="prodQADeleteLike">
+  		delete from ProdQAsLike where member_id = #{member_id} and prodQA_no = #{prodQA_no}
+  	</delete>
+  	
+  	<select id="prodQAReplyListAll" resultType="com.cambak21.domain.ProdQAVO">
+  		select * from ProdQAs where prodQA_ref = #{prodQA_no} and prodQA_refOrder > any(select prodQA_refOrder from ProdQAs where prodQA_no = #{prodQA_no})
+  	</select>
+  	
+  	<select id="getLikes" resultType="com.cambak21.domain.ProdQAsLikeVO">
+  		select * from ProdQAsLike where member_id = #{member_id}
+  	</select>
+  	
+  	<select id="getMaxRefOrder" resultType="int">
+  		select max(prodQA_refOrder) from ProdQAs where prodQA_ref=(select prodQA_ref from ProdQAs where prodQA_no = #{prodQA_no})
+  	</select>
+  	
+  	<select id="getMaxStep" resultType="int">
+  		select prodQA_step from ProdQAs where prodQA_no = #{prodQA_no}
+  	</select>
+  	
+  	<select id="getRef" resultType="int">
+  		select prodQA_ref from ProdQAs where prodQA_no = #{prodQA_no}
+  	</select>
+  	
+  	<select id="getReplyCnt" resultType="int">
+  		select count(*) from ProdQAs where prodQA_ref = #{prodQA_no} and prodQA_refOrder > 1
+  	</select>
+  	
+  	<select id="getRestProdQty" resultType="int">
+  		select product_totQty from Products where product_id = #{product_id}
+  	</select>
+  	
+  </mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.cambak21.mapper.cambakMainMapper">
+
+<!-- 	캠핑장 검색 자동완성 select -->
+	<select id="keywordAutocomplete" resultType="String">
+		select camping_facltNm from Campings where camping_facltNm like concat('%', #{searchWord}, '%') or camping_addr1 like concat('%', #{searchWord}, '%') or camping_addr2 like concat('%', #{searchWord}, '%') order by camping_facltNm limit 0, 10
+	</select>
+
+<!-- 	랜덤 캠핑장 3곳 조회 -->
+	<select id="randomCamping" resultType="com.cambak21.domain.CampingVO">
+		select * from Campings where camping_contentId = #{randomId1} or camping_contentId = #{randomId2} or camping_contentId = #{randomId3}
+	</select>
+
+<!-- 	캠박이일 게시판 별 최신글 3개 조회 -->
+	<select id="newBoardList" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where board_category = #{board_category} order by board_writeDate desc limit 0, 3
+	</select>
+	
+	
+</mapper>

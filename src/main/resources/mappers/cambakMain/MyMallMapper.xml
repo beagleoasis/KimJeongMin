@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mappers.cambakMain.MyMallMapper">
+
+	<!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 대기 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+	<select id="getTotalRefund" resultType="int">
+		select count(*) from
+		goot6.RefundnExchanges where member_id = #{member_id}
+	</select>
+
+	<select id="getRefundList"
+		resultType="com.cambak21.domain.RefundVO">
+		select pay.payment_serialNo, payment_date,
+		refundnExchange_date,
+		refundnExchange_reason, refundnExchange_status,
+		refundnExchange_isChecked, product_name, buyProduct_totPrice
+		from
+		goot6.RefundnExchanges ref join goot6.Payments pay on
+		ref.payment_serialNo = pay.payment_serialNo
+		join goot6.BuyProducts pro
+		on pay.buyProduct_no = pro.buyProduct_no
+		where ref.member_id =
+		#{member_id} order by pay.payment_serialNo desc limit #{pageStart}, #{perPageNum} 
+	</select>
+	
+	<select id="getTotalOrder" resultType="int">
+		SELECT count(*) FROM goot6.BuyProducts where member_id=#{member_id} and buyProduct_isFinished='Y';
+	</select>
+	<select id="getTotalOrderList"
+	resultType="com.cambak21.domain.BuyProductPaymentVO">
+	 SELECT bp.buyProduct_no, bp.member_id, bucket_no, prod.product_name,
+	buyProduct_qty, prod.product_sellPrice,
+	buyProduct_deliveriPay, buyProduct_totPrice, buyProduct_isFinished, prod.product_id, payment_no,
+	payment_serialNo, payInfo_no, destination_no, date_format(payment_date,'%Y-%m-%d %H:%i:%s') as payment_date, product_img1,
+	payment_deliveryMsg, payment_isComit,
+	payment_isChecked
+	FROM goot6.Payments pay join goot6.BuyProducts bp on pay.buyProduct_no =
+	bp.buyProduct_no join Products prod on bp.product_id = prod.product_id  where bp.member_id=#{member_id} and
+	buyProduct_isFinished='Y' order by payment_serialNo desc limit
+	#{pageStart}, #{perPageNum}
+</select>
+	<select id="searchOrder"
+	resultType="com.cambak21.domain.BuyProductPaymentVO">
+	SELECT bp.buyProduct_no, bp.member_id, bucket_no, prod.product_name,
+	buyProduct_qty, prod.product_sellPrice,
+	buyProduct_deliveriPay, buyProduct_totPrice, buyProduct_isFinished, prod.product_id, payment_no,
+	payment_serialNo, payInfo_no, destination_no, date_format(payment_date,'%Y-%m-%d %H:%i:%s') as payment_date, product_img1,
+	payment_deliveryMsg, payment_isComit,
+	payment_isChecked
+	FROM goot6.Payments pay join goot6.BuyProducts bp on pay.buyProduct_no =
+	bp.buyProduct_no join Products prod on bp.product_id = prod.product_id where bp.member_id=#{member_id} and
+	buyProduct_isFinished='Y' and prod.product_name like concat('%',
+	#{searchWord}, '%') order by payment_serialNo desc limit #{pageStart},
+	#{perPageNum}
+</select>
+	<select id="searchOrderCnt" resultType="int">
+		SELECT count(*) FROM goot6.BuyProducts where member_id=#{member_id} and buyProduct_isFinished='Y' and product_name like concat('%', #{searchWord}, '%') order by buyProduct_no
+	</select>
+	<select id="getOrder" resultType="com.cambak21.domain.BuyProductVO">
+		
+		SELECT * FROM goot6.BuyProducts bp join goot6.Products prod on bp.product_name = prod.product_name
+join goot6.Payments pay on pay.buyProduct_no = bp.buyProduct_no
+where pay.member_id=#{member_id} and payment_serialNo=#{payment_serialNo}
+		
+	</select>
+	<select id="getDest" resultType="int">
+		SELECT destination_no FROM goot6.Payments where member_id=#{member_id} and payment_serialNo=#{buyProduct_no}
+	</select>
+	<select id="getDestOne" resultType="com.cambak21.domain.DestinationVO">
+		SELECT * FROM goot6.Destinations where destination_no = #{destination_no}
+	</select>
+	<select id="getPayno" resultType="int">
+		SELECT payInfo_no FROM goot6.Payments where member_id=#{member_id} and payment_serialNo=#{buyProduct_no}
+	</select>
+	<select id="getPayInfo" resultType="com.cambak21.domain.PayInfoVO">
+		SELECT * FROM goot6.PayInfos where payInfo_no = #{payInfo_no}
+	</select>
+	
+	<update id="purchaseSubmit">
+		UPDATE goot6.Payments SET payment_comitDate = now(), payment_isChecked = 'Y' WHERE payInfo_no = #{payInfo_no} and payment_date = #{payment_date}
+		
+	</update>
+	<update id="changePointDate">
+		UPDATE goot6.Points SET point_savingDate = now() WHERE member_id = #{member_id} and payment_date = #{payment_date}
+		
+	</update>
+	<select id="getPointVal" resultType="int">
+		select point_futurePoint from goot6.Points where member_id = #{member_id} and payment_date = #{payment_date}
+	</select>
+	<update id="plusPoint">
+		update goot6.Members set member_totPoint = member_totPoint + #{pointVal}  where member_id = #{member_id}
+	</update>
+	
+	<!-- 정민 -->
+	<select id="checkReview" resultType="com.cambak21.domain.CheckReviewVO">
+		select * from goot6.Payments pay join goot6.ProdReviews re 
+		on pay.buyProduct_no  = re.buyProduct_no where payment_isComit='결제완료'
+		and payment_isChecked = 'Y' and re.member_id = #{member_id} 
+		and re.buyProduct_no = #{buyProduct_no}
+	</select>
+	<!-- 정민 -->
+	
+	<select id="plusTotPurchase" resultType="int">
+		select sum(buyProduct_totPrice) from goot6.BuyProducts buy join goot6.Payments pay on pay.buyProduct_no = buy.buyProduct_no where payment_no = #{payment_no} group by payment_no;
+	</select>
+	<update id="insertTotPurchase">
+		UPDATE goot6.Members SET member_payment = #{totPrice} WHERE member_id = #{member_id}
+	</update>
+	
+	<!-- 환불 시작  -->
+	<select id="getpaymentNoCnt" resultType="int">
+		select count(payment_no) as payment_no from Payments where payment_no = #{payment_no}
+	</select>
+	<select id="getPaymentSerialNo" resultType="com.cambak21.domain.paymentVO">
+		select * from Payments where payment_no = #{payment_no}
+	</select>
+	<insert id="insertRnE">
+		INSERT INTO goot6.RefundnExchanges (refundnExchange_reason, refundnExchange_status, member_id, payment_serialNo) VALUES (#{refundnExchange_reason}, #{refundnExchange_status}, #{member_id}, #{serialNo});
+	</insert>
+	<update id="changePayComit">
+		update goot6.Payments set payment_isComit = #{refundnExchange_status} where payment_no = #{payment_no}
+	</update>
+	<select id="getUsedPoint" resultType="int">
+		select point_usedPoint from goot6.Points where payment_date = #{payment_date} and member_id = #{member_id}
+	</select>
+	<!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+
+	<!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 원영 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+
+	<!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+
+	<!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 정민 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+	<!-- 마이페이지-나의 적립금 포인트 적립 내역 가져오기 -->
+	<select id="getPointList"
+		resultType="com.cambak21.domain.MyPointVO">
+		select p.point_no, p.member_id, p.point_usedPoint, p.point_futurePoint, p.point_reason, p.point_savingDate, 
+		p.payment_date, group_concat(b.product_name) as product_name 
+		from Points p, Payments pm, BuyProducts b
+		where p.member_id = pm.member_id and p.payment_date = pm.payment_date 
+		and pm.buyProduct_no = b.buyProduct_no
+		and p.member_id = #{member_id}
+		group by point_no
+		order by p.payment_date desc;
+	</select>
+	
+	<!-- 마이페이지-나의 적립금 총 게시물 개수 가져오기 -->
+	<select id="getPointListCnt" resultType="int">
+		select count(*) from Points where member_id = #{member_id}
+	</select>
+	<!-- 마이페이지-나의 적립금 총 보유 포인트 가져오기  --> 
+	<select id="getTotMyPoint" resultType="int">
+		select member_totPoint as '나의 포인트' from Members where member_id = #{member_id}
+	</select>
+	
+	<!-- 마이페이지-나의 적립금 총 적립예정 포인트 가져오기 -->
+	<select id="getTotMyFuturePoint" resultType="int">
+		select sum(point_futurePoint) from Points where member_id = #{member_id} and  point_savingDate = '2000-12-31 00:00:00'
+	</select>
+	<!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+
+	<!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 승권 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+	<select id="getListProdQa"
+		resultType="com.cambak21.domain.MyQAVO">
+		select pqa.prodQA_no, p.product_id, p.product_name,
+		pqa.prodQA_content, pqa.prodQA_date, pqa.prodQA_completed
+		from Products p
+		inner join ProdQAs pqa
+		on pqa.product_id = p.product_id
+		where pqa.member_id = #{member_id}
+		order by pqa.prodQA_date desc
+		limit
+		0, 10;
+	</select>
+
+	<select id="prodQaCnt" resultType="int">
+		select count(*) from ProdQAs
+		where member_id = #{member_id};
+	</select>
+
+	<!-- 답변 가져오기 -->
+	<select id="getAnswer" resultType="com.cambak21.domain.ProdQAVO">
+		select * from ProdQAs where
+		prodQA_ref = #{prodQA_no} and prodQA_refOrder = 2;
+	</select>
+
+	<!-- 장바구니 리스트 가져오기 -->
+	<select id="getCartList"
+		resultType="com.cambak21.domain.MyBucketListVO">
+		select p.product_id, p.product_name, p.product_img1,
+		bk.bucket_sellPrice, bk.bucket_buyQty, bk.bucket_totBuyPrice,
+		bk.bucket_isChecked, (select floor(avg(pr.prodReview_grade)) from ProdReviews pr where product_id = p.product_id) as 'star'
+		from Buckets bk
+		inner join Products p
+		on bk.product_id = p.product_id
+		where bk.member_id = #{member_id} and bk.bucket_isDelete = 'N'
+		LIMIT 0, 10;
+	</select>
+
+	<!-- 장바구니 수량 변경 -->
+	<update id="changeQty">
+		update Buckets set bucket_buyQty = #{qty},
+		bucket_totBuyPrice = #{qty} * bucket_sellPrice
+		where member_id =
+		#{member_id}
+		and product_id = #{product_id};
+	</update>
+
+	<!-- 체크박스 on off -->
+	<update id="checkOnOff">
+		update Buckets set bucket_isChecked = if(bucket_isChecked = 'Y', 'N', 'Y') where member_id = #{member_id} and product_id = #{product_id};
+	</update>
+
+	<!-- 장바구니 테이블에 있는 데이터 지우기 -->
+	<update id="deleteItemB">
+		update Buckets set bucket_isDelete = 'Y' where member_id = #{member_id} and product_id = #{product_id};
+	</update>
+	
+	<!-- 장바구니 테이블에 있는 데이터 지우기 -->
+	<update id="deleteItemAllB">
+		update Buckets set bucket_isDelete = 'Y' where member_id = #{member_id}
+	</update>
+	
+	<!-- 주문하기 -->
+	<!-- 장바구니에서 Y체크 된것들만 가져오기 -->
+	<select id="getBucketInfos" resultType="com.cambak21.domain.MyBucketCheckdVO">
+		select b.member_id, b.bucket_no, p.product_name, b.bucket_buyQty, b.bucket_sellPrice, b.bucket_totBuyPrice, p.product_id, b.bucket_isChecked 
+		from Buckets b
+		inner join Products p
+		on b.product_id = p.product_id
+		where b.member_id = #{member_id}
+		and b.bucket_isChecked = 'Y' and b.bucket_isDelete = 'N';
+	</select>
+	<!-- BuyProducts테이블에 insert -->
+	<insert id="insertBP" parameterType="java.util.Map"> <!-- DAO에서 Map을 보냈기 때문에 -->
+		insert into BuyProducts (member_id, bucket_no, product_name, buyProduct_qty, product_sellPrice, buyProduct_totPrice, product_id) values
+		<foreach collection="vo" item="item" separator=",">
+			(#{item.member_id}, #{item.bucket_no}, #{item.product_name}, #{item.bucket_buyQty}, #{item.bucket_sellPrice}, #{item.bucket_totBuyPrice}, #{item.product_id})
+		</foreach>
+	</insert>
+	
+	<delete id="deletePastCart">
+		update BuyProducts set buyProduct_isFinished = replace(buyProduct_isFinished, 'N', 'Y') where member_id = #{member_id}
+	</delete>
+	
+	<!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+
+	<!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 도연 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+	<select id="getNonUserBucketList" resultType="com.cambak21.domain.MyNonUserBucketVO">
+		select p.product_id, p.product_name, p.product_img1,
+		nbk.nonUserBucket_sellPrice, nbk.nonUserBucket_buyQty, nbk.nonUserBucket_totBuyPrice,
+		nbk.nonUserBucket_isChecked, (select floor(avg(pr.prodReview_grade)) from ProdReviews pr where product_id = p.product_id) as 'star'
+		from NonUserBuckets nbk
+		inner join Products p
+		on nbk.product_id = p.product_id
+		where nbk.nonUserBucket_ssid = #{ssid}
+		LIMIT 0, 10;
+	</select>
+	
+	<update id="changeNonUserQty">
+		update NonUserBuckets set nonUserBucket_buyQty = #{qty},
+		nonUserBucket_totBuyPrice = #{qty} * nonUserBucket_sellPrice
+		where nonUserBucket_ssid =
+		#{ssid}
+		and product_id = #{product_id};
+	</update>
+	
+	<!-- 장바구니 테이블에 있는 데이터 지우기 -->
+	<delete id="nonUserDeleteItemAllB">
+		delete from NonUserBuckets where nonUserBucket_ssid = #{ssid};
+	</delete>
+	
+	<!-- 장바구니 테이블에 있는 데이터 지우기 -->
+	<delete id="nonUserDeleteItem">
+		delete from NonUserBuckets where nonUserBucket_ssid = #{ssid} and product_id = #{product_id};
+	</delete>
+	
+	<update id="nonUserCheckOnOff">
+		update NonUserBuckets set nonUserBucket_isChecked = if(nonUserBucket_isChecked = 'Y', 'N', 'Y') where nonUserBucket_ssid = #{ssid} and product_id = #{product_id};
+	</update>
+
+	<!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+
+</mapper>

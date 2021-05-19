@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.cambak21.mappers.cambakBoard.CampingReview">
+  
+  <select id="getCRAll" resultType="com.cambak21.domain.BoardVO">
+  		select * from Boards where board_category = 'camping' order by board_no desc
+  </select>
+  
+  <select id="listBoardCampingReview" resultType="com.cambak21.domain.BoardVO">
+  		select * from Boards where board_category = 'camping' order by board_no desc limit #{pageStart}, #{perPageNum}
+  </select>
+  
+  <select id="getTotalCRCnt" resultType="int">
+  		select count(*) from Boards where board_category = 'camping'
+  </select>
+  
+  <select id="CRRead" resultType="com.cambak21.domain.BoardVO">
+  		select * from Boards where board_no = #{no} 
+  </select>
+  
+  <!-- 게시글 수정 -->
+	<update id="updateBoardCR">
+		update Boards 
+		set board_title = #{board_title}, board_content = #{board_content}, board_updateDate = now()
+		where board_no = #{board_no};
+	</update>
+	
+	<!-- 게시글 삭제 -->
+	<delete id="deleteBoardCR">
+		delete from Boards where board_no = #{board_no};
+	</delete>
+	
+  <!--  조회수 업데이트  -->
+  <update id="updateView">
+  		update Boards set board_viewCnt = board_viewCnt + #{amount} where board_no = #{no} 
+  </update>
+  
+  <insert id="writeBoardCR">
+  		insert into Boards(member_id, board_title, board_category, board_content)
+		values(#{member_id}, #{board_title}, #{board_category}, #{board_content});
+  </insert>
+  
+  <select id="listCRReply" resultType="com.cambak21.domain.ReplyBoardVO">
+  		select * from ReplyBoards where board_no = #{bno} order by replyBoard_no asc;
+  </select>
+  
+  <update id="updateReplyBoardCR">
+  		update ReplyBoards set replyBoard_content = #{replyBoard_content}, replyBoard_updateDate = now() where replyBoard_no = ${replyBoard_no}
+  </update>
+  
+  <insert id="insertReplyBoard">
+  		insert into ReplyBoards(board_no, replyBoard_content, member_id) values(#{board_no}, #{replyBoard_content}, #{member_id})
+  </insert>
+  
+  <update id="updateCRReivewCnt">
+  		update Boards set board_replyCnt = board_replyCnt + #{amount} where board_no = #{board_no}
+  </update>
+  
+  <select id="getBoardNo" resultType="int">
+  		select max(board_no) from Boards where member_id = #{member_id}
+  </select>
+  
+  <delete id="dropReply">
+  		delete from ReplyBoards where replyBoard_no = #{replyBoard_no}
+  </delete>
+  
+  <delete id="removeCRBoard">
+  		delete from Boards where board_no = #{board_no}
+  </delete>
+  
+  <select id="searchBoard" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where board_category = 'camping' and
+		
+		<if test="searchType == 'title'">
+			board_title like concat('%', #{searchWord}, '%')
+		</if>
+		
+		<if test="searchType == 'content'">
+			board_content like concat('%', #{searchWord}, '%')
+		</if>
+		
+		<if test="searchType == 'writer'">
+			member_id like concat('%', #{searchWord}, '%')
+		</if>
+		and board_category = 'camping' order by board_no desc limit #{pageStart}, #{perPageNum} 
+	</select>
+  
+	  <select id="searchBoardCnt" resultType="int">
+			select count(*) from Boards where board_category = 'camping' and
+			
+		<if test="searchType == 'title'">
+			board_title like concat('%', #{searchWord}, '%')
+		</if>
+		
+		<if test="searchType == 'content'">
+			board_content like concat('%', #{searchWord}, '%')
+		</if>
+		
+		<if test="searchType == 'writer'">
+			member_id like concat('%', #{searchWord}, '%')
+		</if>
+			  
+	  </select>
+	  
+	  <!-- 게시글 상세보기 -->
+	<select id="readBoardCampingReview" resultType="com.cambak21.domain.BoardVO">
+		select board_no, b.member_id, board_title, board_content, board_writeDate, board_updateDate, board_likeCnt, board_viewCnt
+		from Boards b where board_no = #{board_no};
+	</select>
+  
+  
+  
+  
+  
+  
+</mapper>

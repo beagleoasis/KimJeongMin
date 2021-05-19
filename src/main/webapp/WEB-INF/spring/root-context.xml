@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:aop="http://www.springframework.org/schema/aop"
+   xmlns:context="http://www.springframework.org/schema/context"
+   xmlns:tx="http://www.springframework.org/schema/tx"
+   xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+   xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+      http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+      http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd">
+   
+   <!-- Root Context: defines shared resources visible to all other web components -->
+   <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+      <!-- <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>  -->
+      <property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
+      <!-- <property name="url" value="jdbc:mysql://127.0.0.1:3306/test?serverTimezone=Asia/Seoul"></property>  -->
+      <property name="url" value="jdbc:log4jdbc:mysql://goot6.cafe24.com:3306/goot6?serverTimezone=Asia/Seoul"></property>
+      <property name="username" value="goot6"></property>
+      <property name="password" value="goot6321"></property>
+   </bean>   
+   
+   <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+      <property name="dataSource" ref="dataSource"></property>
+      <property name="mapperLocations" value="classpath:mappers/**/*Mapper.xml"></property>
+      <property name="configLocation" value="classpath:/myBatisConfig.xml"></property>
+   </bean>
+   
+   <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" destroy-method="clearCache">
+      <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"></constructor-arg>
+   </bean>
+   
+   <!-- 트랜잭션 처리 객체 설정 : 트랜잭션을 어노테이션으로 관리 하겠다 -->
+   <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+      <property name="dataSource" ref="dataSource"></property>
+   </bean>  
+   
+   <!--  아이디/비번 찾기를 위한 이메일 인증 UUID발송용 빈설정 -->
+   <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+   	   <property name="host" value="smtp.gmail.com" />
+   	   <property name="port" value="587" />
+   	   <property name="username" value="goot6610" />
+   	   <property name="password" value="sjpqcricbamwpnyc" />
+   	   <property name="javaMailProperties" >
+   	   		<props>
+   	   			<prop key="mail.smtp.auth">true</prop>
+   	   			<prop key="mail.smtp.starttls.enable">true</prop>
+   	   		</props>
+   	   </property>
+   </bean>
+   
+   <!-- sql 확인을 위한 logger 작업 -->
+
+    
+    <bean id="dataSource1" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+		<constructor-arg ref="dataSource" />
+		<property name="logFormatter">
+			<bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+				<property name="loggingType" value="MULTI_LINE" />
+				<property name="sqlPrefix" value="SQL         :  "/>
+			</bean>
+		</property>
+	</bean>
+   
+   <!-- @Repository 패키지 스캔(우리가 만든 빈 추가하기 위해)  => DAO패키지와 Service패키지를 자동 스캔하여 bean을 생성할 수 있도록-->
+   <context:component-scan base-package="com.cambak21.persistence"></context:component-scan>
+   <context:component-scan base-package="com.cambak21.service"></context:component-scan>  
+   
+    
+	<!-- **************************************** 김도연 패키지 스캔 ********************************************** -->
+	<context:component-scan base-package="com.cambak21.persistence.boardProdQA"></context:component-scan>
+	<context:component-scan base-package="com.cambak21.service.boardProdQA"></context:component-scan>
+	
+	<!-- **************************************** 김대기 패키지 스캔 ********************************************** -->
+	<context:component-scan base-package="com.cambak21.persistence.boardHumor"></context:component-scan>
+	<context:component-scan base-package="com.cambak21.persistence.boardHumorReply"></context:component-scan>
+    
+    
+	<!-- **************************************** 장원영 패키지 스캔 ********************************************** -->
+	<context:component-scan base-package="com.cambak21.persistence.boardQA"></context:component-scan>
+    <context:component-scan base-package="com.cambak21.service.boardQA"></context:component-scan>
+    
+	<!-- **************************************** 박종진 패키지 스캔 ********************************************** -->
+	<context:component-scan base-package="com.cambak21.persistence.boardNotice"></context:component-scan>
+    <context:component-scan base-package="com.cambak21.service.boardNotice"></context:component-scan>
+	
+	<!-- **************************************** 이영광 패키지 스캔 ********************************************** -->
+	<context:component-scan base-package="com.cambak21.persistence.boardCampingReview"></context:component-scan>
+    <context:component-scan base-package="com.cambak21.service.boardCampingReview"></context:component-scan>
+	
+	<!-- **************************************** 김정민 패키지 스캔 ********************************************** -->
+	<context:component-scan base-package="com.cambak21.service.boardProdReview"></context:component-scan>
+    <context:component-scan base-package="com.cambak21.persistence.boardProdReview"></context:component-scan> 
+    <context:component-scan base-package="com.cambak21.service.myPost"></context:component-scan>
+    <context:component-scan base-package="com.cambak21.persistence.myPost"></context:component-scan>
+    
+     
+	<!-- **************************************** 서효원 패키지 스캔 ********************************************** -->
+	<context:component-scan base-package="com.cambak21.service.boardCampingTip"></context:component-scan>
+	<context:component-scan base-package="com.cambak21.persistence.boardCampingTip"></context:component-scan>
+	
+	<!-- **************************************** 백승권 패키지 스캔 ********************************************** -->
+	<context:component-scan base-package="com.cambak21.persistence.boardCS"></context:component-scan>
+	<context:component-scan base-package="com.cambak21.service.boardCS"></context:component-scan>
+	
+	<!-- **************************************** 김태훈 패키지 스캔 ********************************************** -->
+	<context:component-scan base-package="com.cambak21.persistence.resell"></context:component-scan>
+    <context:component-scan base-package="com.cambak21.service.resell"></context:component-scan> 
+
+	<!-- ************************************* 캠박메인 공용 패키지 스캔 ******************************************* -->
+		<context:component-scan base-package="com.cambak21.persistence.cambakMain"></context:component-scan>
+    <context:component-scan base-package="com.cambak21.service.cambakMain"></context:component-scan> 
+
+	<!-- ************************************* 캠박메인 마이페이지 공용 패키지 스캔 ******************************************* -->
+	<context:component-scan base-package="com.cambak21.persistence.cambakMain"></context:component-scan>
+    <context:component-scan base-package="com.cambak21.service.cambakMain"></context:component-scan> 
+    
+    <!-- ************************************* 캠박몰 공용 패키지 스캔 ******************************************* -->
+    <context:component-scan base-package="com.cambak21.persistence.cambakMall"></context:component-scan>
+    <context:component-scan base-package="com.cambak21.service.cambakMall"></context:component-scan>
+
+</beans>

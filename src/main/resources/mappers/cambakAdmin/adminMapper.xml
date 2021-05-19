@@ -1,0 +1,1643 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.cambak21.mappers.cambakAdmin.adminMapper">
+  <!-- ***************************************** 도연 ********************************************************************************* -->
+	<select id="getMember" resultType="com.cambak21.domain.MemberVO">
+		select * from Members where member_isDelete = 'N' order by member_registerDate limit #{pageStart}, #{perPageNum}
+	</select>
+	
+	<select id="getTotMemberCnt" resultType="int">
+		select count(*) from Members where member_isDelete = 'N'
+	</select>
+	
+	<update id="deleteMember">
+		update Members set member_isDelete = 'Y' where member_id = #{member_id}
+	</update>	
+	
+	<update id="updateMember">
+		update Members set member_name = #{member_name}, member_totPoint = #{member_totPoint} where member_id = #{member_id}
+	</update>
+	
+	<select id="memberSearch" resultType="com.cambak21.domain.MemberVO">
+		select * from Members where member_isDelete = 'N'
+		<choose>
+			<when test="memberOption == 'name'">
+				and member_name like concat('%', #{memberOptionSearchWord}, '%') 			
+			</when>
+			<when test="memberOption == 'id'">
+				and member_id like concat('%', #{memberOptionSearchWord}, '%') 			
+			</when>
+			<when test="memberOption == 'email'">
+				and member_email like concat('%', #{memberOptionSearchWord}, '%') 		
+			</when>
+			<when test="memberOption == 'mobile'">
+				and member_mobile like concat('%', #{memberOptionSearchWord}, '%') 			
+			</when>
+		</choose>
+		
+		<choose>
+			<when test="dateOption == 'birth' and checkLowDate == ''">
+				and #{checkHighDate} >= member_birth 
+			</when>
+			<when test="dateOption == 'birth'">
+				and member_birth between #{checkLowDate} and #{checkHighDate}		
+			</when>
+			<when test="dateOption == 'registDate' and checkLowDate == ''">
+				and #{checkLowDate} >= member_registerDate 
+			</when>
+			<when test="dateOption == 'registDate'">
+				and member_registerDate between #{checkLowDate} and #{checkHighDate}		
+			</when>
+		</choose>
+		
+		<choose>
+			<when test="PriceOption == 'puchasePrice' and checkLowNum == ''">
+				and #{checkHighNum} >= member_payment 
+			</when>
+			<when test="PriceOption == 'puchasePrice' and checkHighNum == ''">
+				and member_payment >= #{checkLowNum}
+			</when>
+			<when test="PriceOption == 'puchasePrice'">
+				and member_payment between #{checkLowNum} and #{checkHighNum}		
+			</when>
+			<when test="PriceOption == 'point' and checkLowNum == ''">
+				and #{checkHighNum} >= member_totPoint 
+			</when>
+			<when test="PriceOption == 'point' and checkHighNum == ''">
+				and member_totPoint >= #{checkLowNum}
+			</when>
+			<when test="PriceOption == 'point'">
+				and member_totPoint between #{checkLowNum} and #{checkHighNum}		
+			</when>
+		</choose>
+		
+		<if test="genderResult != 'all'">
+			and member_gender = #{genderResult}
+		</if>
+		
+		<if test="AResult != '' and BResult != '' and CResult == ''">
+			and (grade_name = 'A' or grade_name = 'B')
+		</if>
+		<if test="AResult != '' and BResult == '' and CResult != ''">
+			and (grade_name = 'A' or grade_name = 'C')
+		</if>
+		<if test="AResult == '' and BResult != '' and CResult != ''">
+			and (grade_name = 'C' or grade_name = 'B')
+		</if>
+		<if test="AResult != '' and BResult == '' and CResult == ''">
+			and grade_name = 'A' 
+		</if>
+		<if test="AResult == '' and BResult != '' and CResult == ''">
+			and grade_name = 'B' 
+		</if>
+		<if test="AResult == '' and BResult == '' and CResult != ''">
+			and grade_name = 'C' 
+		</if>
+		
+		order by member_registerDate limit #{pageStart}, #{perPageNum}
+		
+	</select>
+	
+	<select id="getmemberSearchCnt" resultType="int">
+				select count(*) from Members where member_isDelete = 'N'
+		<choose>
+			<when test="memberOption == 'name'">
+				and member_name like concat('%', #{memberOptionSearchWord}, '%') 			
+			</when>
+			<when test="memberOption == 'id'">
+				and member_id like concat('%', #{memberOptionSearchWord}, '%') 			
+			</when>
+			<when test="memberOption == 'email'">
+				and member_email like concat('%', #{memberOptionSearchWord}, '%') 		
+			</when>
+			<when test="memberOption == 'mobile'">
+				and member_mobile like concat('%', #{memberOptionSearchWord}, '%') 			
+			</when>
+		</choose>
+		
+		<choose>
+			<when test="dateOption == 'birth' and checkLowDate == ''">
+				and #{checkHighDate} >= member_birth 
+			</when>
+			<when test="dateOption == 'birth'">
+				and member_birth between #{checkLowDate} and #{checkHighDate}		
+			</when>
+			<when test="dateOption == 'registDate' and checkLowDate == ''">
+				and #{checkLowDate} >= member_registerDate 
+			</when>
+			<when test="dateOption == 'registDate'">
+				and member_registerDate between #{checkLowDate} and #{checkHighDate}		
+			</when>
+		</choose>
+		
+		<choose>
+			<when test="PriceOption == 'puchasePrice' and checkLowNum == ''">
+				and #{checkHighNum} >= member_payment 
+			</when>
+			<when test="PriceOption == 'puchasePrice' and checkHighNum == ''">
+				and member_payment >= #{checkLowNum}
+			</when>
+			<when test="PriceOption == 'puchasePrice'">
+				and member_payment between #{checkLowNum} and #{checkHighNum}		
+			</when>
+			<when test="PriceOption == 'point' and checkLowNum == ''">
+				and #{checkHighNum} >= member_totPoint 
+			</when>
+			<when test="PriceOption == 'point' and checkHighNum == ''">
+				and member_totPoint >= #{checkLowNum}
+			</when>
+			<when test="PriceOption == 'point'">
+				and member_totPoint between #{checkLowNum} and #{checkHighNum}		
+			</when>
+		</choose>
+		
+		<if test="genderResult != 'all'">
+			and member_gender = #{genderResult}
+		</if>
+		
+		<if test="AResult != '' and BResult != '' and CResult == ''">
+			and (grade_name = 'A' or grade_name = 'B')
+		</if>
+		<if test="AResult != '' and BResult == '' and CResult != ''">
+			and (grade_name = 'A' or grade_name = 'C')
+		</if>
+		<if test="AResult == '' and BResult != '' and CResult != ''">
+			and (grade_name = 'C' or grade_name = 'B')
+		</if>
+		<if test="AResult != '' and BResult == '' and CResult == ''">
+			and grade_name = 'A' 
+		</if>
+		<if test="AResult == '' and BResult != '' and CResult == ''">
+			and grade_name = 'B' 
+		</if>
+		<if test="AResult == '' and BResult == '' and CResult != ''">
+			and grade_name = 'C' 
+		</if>
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+  <!-- ***************************************** 도연 끝 ********************************************************************************* -->
+  
+  <!-- ***************************************** 대기 ********************************************************************************* -->
+	<select id="getDayRevenue" resultType="com.cambak21.domain.RevenueVO">
+     select sum(buyProduct_totPrice) as buyProduct_totPrice, date_format(p.payment_date,'%Y-%m-%d') as payment_date from BuyProducts b join Payments p on b.buyProduct_no = p.buyProduct_no 
+   where buyProduct_isFinished = 'y' and payment_date  > curdate()  group by date_format(p.payment_date,'%Y-%m-%d')
+  </select>
+  
+  <select id="getPerDayRevenue" resultType="com.cambak21.domain.RevenueVO">
+    select sum(buyProduct_totPrice) as buyProduct_totPrice, date_format(p.payment_date,'%Y-%m-%d') as payment_date from BuyProducts b join Payments p on b.buyProduct_no = p.buyProduct_no 
+   where buyProduct_isFinished = 'y' and now() > payment_date and payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -#{dateVal} DAY)) group by date_format(p.payment_date,'%Y-%m-%d')
+  </select>
+  
+  <select id="betweenDayRevenue" resultType="com.cambak21.domain.RevenueVO">
+     select sum(buyProduct_totPrice) as buyProduct_totPrice, date_format(p.payment_date,'%Y-%m-%d') as payment_date from BuyProducts b join Payments p on b.buyProduct_no = p.buyProduct_no 
+   where buyProduct_isFinished = 'y' and payment_date between #{startDate} and #{endDate} group by date_format(p.payment_date,'%Y-%m-%d');
+
+  </select>
+  <select id="productSelectDate" resultType="com.cambak21.domain.ProductAnalysisVO">
+  	select sum(buyProduct_totPrice) as buyProduct_totPrice, sum(buyProduct_qty) as product_count, product_name, date_format(p.payment_date,'%Y-%m-%d') as payment_date from BuyProducts b join Payments p on b.buyProduct_no = p.buyProduct_no 
+where payment_isComit = '결제완료' and payment_date between #{startDate} and #{endDate} group by product_name limit 0, 9;
+  </select>
+  <select id="selectMonthly" resultType="com.cambak21.domain.RevenueMonthVO">
+     select sum(buyProduct_totPrice) as buyProduct_totPrice, date_format(p.payment_date,'%Y-%m-%d') as payment_date from BuyProducts b join Payments p on b.buyProduct_no = p.buyProduct_no 
+where buyProduct_isFinished = 'y' and  now() > payment_date and payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -${revenueMonthly} MONTH)) group by date_format(p.payment_date,'%Y-%m')
+  </select>
+  <select id="selectWeekly" resultType="com.cambak21.domain.RevenueWeeklyVO">
+  select sum(buyProduct_totPrice) as buyProduct_totPrice, DATE_FORMAT(p.payment_date, '%Y-%u') as payment_week from BuyProducts b join Payments p on b.buyProduct_no = p.buyProduct_no 
+where buyProduct_isFinished = 'y' and  now() > payment_date and payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -${revenuWeekly} WEEK)) group by payment_week;
+  
+  </select>
+  <select id="thisMonthRevenue" resultType="com.cambak21.domain.RevRefundVO">
+  select sum(buyProduct_totPrice) as buyProduct_totPrice, date_format(p.payment_date,'%Y-%m') as payment_date from 
+BuyProducts b join Payments p on b.buyProduct_no = p.buyProduct_no 
+where buyProduct_isFinished = 'y' and  now() > payment_date and 
+payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -0 MONTH)) group by date_format(p.payment_date,'%Y-%m');
+  </select>
+  <select id="prevMonthRevenue" resultType="com.cambak21.domain.RevRefundVO">
+  select sum(buyProduct_totPrice) as buyProduct_totPrice, date_format(p.payment_date,'%Y-%m') as payment_date from 
+BuyProducts b join Payments p on b.buyProduct_no = p.buyProduct_no 
+where buyProduct_isFinished = 'y' and  now() > payment_date and 
+payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -1 MONTH)) group by date_format(p.payment_date,'%Y-%m');
+  </select>
+  <select id="thisMonthRefund" resultType="com.cambak21.domain.RevRefundVO">
+  SELECT date_format(payment_date,'%Y-%m') as payment_date, sum(buy.buyProduct_totPrice) as buyProduct_totPrice FROM goot6.Payments pay 
+join goot6.BuyProducts buy on pay.buyProduct_no = buy.buyProduct_no
+where payment_isComit='환불' and now() > payment_date and 
+payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -0 MONTH)) group by payment_isComit;
+  </select>
+  <select id="prevMonthRefund" resultType="com.cambak21.domain.RevRefundVO">
+  SELECT date_format(payment_date,'%Y-%m') as payment_date, sum(buy.buyProduct_totPrice) as buyProduct_totPrice FROM goot6.Payments pay 
+join goot6.BuyProducts buy on pay.buyProduct_no = buy.buyProduct_no
+where payment_isComit='환불' and now() > payment_date and 
+payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -1 MONTH)) group by payment_isComit;
+  </select>
+  
+  <select id="thisWeekRevenue" resultType="com.cambak21.domain.RevRefundVO">
+  select sum(buyProduct_totPrice) as buyProduct_totPrice, 
+DATE_FORMAT(p.payment_date, '%Y-%u') as payment_date from BuyProducts b join Payments p 
+on b.buyProduct_no = p.buyProduct_no 
+where buyProduct_isFinished = 'y' and  now() > payment_date and 
+payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -0 WEEK)) group by DATE_FORMAT(p.payment_date, '%Y-%u');
+  </select>
+  <select id="prevWeekRevenue" resultType="com.cambak21.domain.RevRefundVO">
+  select sum(buyProduct_totPrice) as buyProduct_totPrice, 
+DATE_FORMAT(p.payment_date, '%Y-%u') as payment_date from BuyProducts b join Payments p 
+on b.buyProduct_no = p.buyProduct_no 
+where buyProduct_isFinished = 'y' and  now() > payment_date and 
+payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -1 WEEK)) group by DATE_FORMAT(p.payment_date, '%Y-%u');
+  </select>
+  <select id="thisWeekRefund" resultType="com.cambak21.domain.RevRefundVO">
+  select sum(buyProduct_totPrice) as buyProduct_totPrice, 
+DATE_FORMAT(p.payment_date, '%Y-%u') as payment_date from BuyProducts b join Payments p 
+on b.buyProduct_no = p.buyProduct_no 
+where payment_isComit='환불' and  now() > payment_date and 
+payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -0 WEEK)) group by DATE_FORMAT(p.payment_date, '%Y-%u');
+  </select>
+  <select id="prevWeekRefund" resultType="com.cambak21.domain.RevRefundVO">
+  select sum(buyProduct_totPrice) as buyProduct_totPrice, 
+DATE_FORMAT(p.payment_date, '%Y-%u') as payment_date from BuyProducts b join Payments p 
+on b.buyProduct_no = p.buyProduct_no 
+where payment_isComit='환불' and  now() > payment_date and 
+payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -1 WEEK)) group by DATE_FORMAT(p.payment_date, '%Y-%u');
+  </select>
+
+  
+  <select id="selectEachWeek" resultType="com.cambak21.domain.RevenueEachWeekVO">
+  <![CDATA[
+	  select count(b.buyProduct_no) as buyProduct_no ,sum(b.buyProduct_qty) as buyProduct_qty,DATE_FORMAT(p.payment_date, '%Y-%u') as payment_week,
+	sum(buyProduct_deliveriPay) as buyProduct_deliveriPay,sum(buyProduct_totPrice) as buyProduct_totPrice
+	,   date_sub(p.payment_date, interval 0 week) as weeks,
+	 date_format(
+	    if(
+	      weekday(
+	        date_sub(p.payment_date, interval 0 week)
+	      ) = 0, 
+	      date_sub(p.payment_date, interval 0 week), 
+	      date_sub(
+	        date_sub(p.payment_date, interval 0 week), 
+	        interval (
+	          weekday(
+	            date_sub(p.payment_date, interval 0 week)
+	          )
+	        ) DAY
+	      )
+	    ), 
+	    '%Y-%m-%d'
+	  ) AS startDate,
+	date_format(
+	    if(
+	      weekday(
+	        date_sub(p.payment_date, interval 0 week)
+	      ) = 6, 
+	      date_sub(p.payment_date, interval 0 week), 
+	      date_add(
+	        date_sub(p.payment_date, interval 0 week), 
+	        interval (
+	          6 - weekday(
+	            date_sub(p.payment_date, interval 0 week)
+	          )
+	        ) DAY
+	      )
+	    ), 
+	    '%Y-%m-%d'
+	  ) AS endDate from BuyProducts b join Payments p 
+	on b.buyProduct_no = p.buyProduct_no 
+	where buyProduct_isFinished = 'Y' and payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -#{revenueWeekly} WEEK)) and payment_date < (SELECT DATE_ADD(NOW(), INTERVAL -#{revenueWeekly} +1 WEEK))
+	group by DATE_FORMAT(p.payment_date, '%Y-%u') order by startDate desc ]]>
+  </select>
+  
+  <select id="selectEachWeekRefund" resultType="com.cambak21.domain.RevenueEachWeekVO">
+  <![CDATA[
+  select sum(buyProduct_totPrice) as buyProduct_refundTotPrice
+,  date_sub(p.payment_date, interval 0 week) as weeks,DATE_FORMAT(p.payment_date, '%Y-%u') as payment_week,
+ date_format(
+    if(
+      weekday(
+        date_sub(p.payment_date, interval 0 week)
+      ) = 0, 
+      date_sub(p.payment_date, interval 0 week), 
+      date_sub(
+        date_sub(p.payment_date, interval 0 week), 
+        interval (
+          weekday(
+            date_sub(p.payment_date, interval 0 week)
+          )
+        ) DAY
+      )
+    ), 
+    '%Y-%m-%d'
+  ) AS startDate,
+date_format(
+    if(
+      weekday(
+        date_sub(p.payment_date, interval 0 week)
+      ) = 6, 
+      date_sub(p.payment_date, interval 0 week), 
+      date_add(
+        date_sub(p.payment_date, interval 0 week), 
+        interval (
+          6 - weekday(
+            date_sub(p.payment_date, interval 0 week)
+          )
+        ) DAY
+      )
+    ), 
+    '%Y-%m-%d'
+  ) AS endDate  from BuyProducts b join Payments p 
+on b.buyProduct_no = p.buyProduct_no 
+where payment_isComit='환불' and payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -#{revenueWeekly} WEEK)) and payment_date < (SELECT DATE_ADD(NOW(), INTERVAL -#{revenueWeekly} +1 WEEK))
+ group by startDate order by startDate desc ]]>
+  </select>
+  
+  <select id="productAnalysis" resultType="com.cambak21.domain.ProductAnalysisVO">
+  	select sum(buyProduct_totPrice) as buyProduct_totPrice, sum(buyProduct_qty) as product_count, product_name, date_format(p.payment_date,'%Y-%m-%d') as payment_date from BuyProducts b join Payments p on b.buyProduct_no = p.buyProduct_no 
+where payment_isComit = '결제완료' and now() > payment_date and payment_date > (SELECT DATE_ADD(NOW(), INTERVAL -#{perDate} DAY)) group by product_name limit 0, 9;
+  </select>
+  
+  
+  <!-- ***************************************** 대기 끝 ********************************************************************************* -->
+  
+  <!-- ***************************************** 승권 ********************************************************************************* -->
+  
+  
+  <select id="getProduct" resultType="com.cambak21.domain.ProductsVO">
+  	select * from Products where product_id = #{product_id}
+  </select>
+  
+  <!-- 상품 등록 -->
+  <insert id="insertProduct">
+  	insert into Products (mainCategory_id, middleCategory_id, product_name, product_purchPrice, product_purchaseQty, product_saleQty, product_totQty, product_sellPrice, product_factory, product_detail, product_img1, product_show, product_shipPrice, product_title, product_popularProduct)
+	values
+	(#{mainCategory_id}, #{middleCategory_id}, #{product_name}, #{product_purchPrice}, #{product_purchaseQty}, #{product_saleQty}, #{product_purchaseQty}, #{product_sellPrice}, #{product_factory}, #{product_detail}, #{product_img1}, #{product_show}, #{product_shipPrice}, #{product_title}, #{product_popularProduct});
+  </insert>
+  
+ 	<!-- 상품 수정 -->
+ 	<update id="updateProduct">
+ 		update Products set product_name = #{product_name}, product_purchPrice = #{product_purchPrice}, product_factory = #{product_factory}, product_title = #{product_title}, product_detail = #{product_detail}, product_img1 = #{product_img1}, mainCategory_id = #{mainCategory_id}, middleCategory_id = #{middleCategory_id}, product_sellPrice = #{product_sellPrice}, product_show = #{product_show}, product_popularProduct = #{product_popularProduct}, product_shipPrice = #{product_shipPrice}
+ 		where product_id = #{product_id}; 
+ 	</update> 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <!-- ***************************************** 승권 끝 ********************************************************************************* -->
+   
+  <!-- ***************************************** 원영 ********************************************************************************* -->
+  
+  	<select id="getAdmin_ProdQA" resultType="com.cambak21.dto.AdminQADTO">
+  		select * from ProdQAs where date_format(prodQA_date, '%Y-%m-%d') between #{goStartDate} and #{goEndDate} order by prodQA_no desc limit #{pageStart}, #{perPageNum}
+  	</select>
+
+  	<select id="getAdmin_ProdReviewlst" resultType="com.cambak21.dto.AdminProdReviewDTO">
+  		select * from ReplyProdReviews where date_format(prodReview_postDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate} order by prodReview_no desc limit #{pageStart}, #{perPageNum}
+  	</select>
+  	
+  	<select id="getAdmin_ReplyProdReviewlst" resultType="com.cambak21.dto.AdminReplyProdReviewDTO">
+  		select p.prodReview_no, p.product_id, p.member_id, p.prodReview_title, p.prodReview_grade, p.prodReview_postDate, p.prodReview_isDelete, p.prodReview_updateDate, p.prodReview_likeCnt, p.prodReview_replyCnt, r.replyProdReview_no, r.prodReview_no as RprodReview_no, r.member_id as Rmember_id, r. replyProdReview_content, r.replyProdReview_date, r.replyProdReview_isDelete, r.replyProdReview_repMember_id from ReplyProdReviews r, ProdReviews p where p.prodReview_no = r.prodReview_no and date_format(r.replyProdReview_date, '%Y-%m-%d') between #{goStartDate} and #{goEndDate} order by r.replyProdReview_no desc limit #{pageStart}, #{perPageNum}
+  	</select>
+  
+  
+  	<select id="searchgetAdmin_ProdQA" resultType="com.cambak21.dto.AdminQADTO">
+  		select * from ProdQAs where
+  		
+	  		<if test="searchboardType == 'title'">
+	  			prodQA_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="searchboardType == 'content'">
+	  			prodQA_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="searchboardType == 'member_id'">
+	  			member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+  		(date_format(prodQA_date, '%Y-%m-%d') between #{goStartDate} and #{goEndDate}) order by prodQA_no desc limit #{pageStart}, #{perPageNum}
+  	</select>
+  	
+  
+  	<select id="searchgetAdmin_ProdReviewlst" resultType="com.cambak21.dto.AdminProdReviewDTO">
+  		select * from ProdReviews where
+  		
+	  		<if test="searchboardType == 'title'">
+	  			prodReview_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="searchboardType == 'content'">
+	  			prodReview_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="searchboardType == 'member_id'">
+	  			member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+  		(date_format(prodReview_postDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate}) order by prodReview_no desc limit #{pageStart}, #{perPageNum}
+  	</select>
+  	
+  
+  	<select id="searchgetAdmin_ReplyProdReviewlst" resultType="com.cambak21.dto.AdminReplyProdReviewDTO">
+  		select p.prodReview_no, p.product_id, p.member_id, p.prodReview_title, p.prodReview_grade, p.prodReview_postDate, p.prodReview_isDelete, p.prodReview_updateDate, p.prodReview_likeCnt, p.prodReview_replyCnt, r.replyProdReview_no, r.prodReview_no as RprodReview_no, r.member_id as Rmember_id, r. replyProdReview_content, r.replyProdReview_date, r.replyProdReview_isDelete, r.replyProdReview_repMember_id from ReplyProdReviews r, ProdReviews p where p.prodReview_no = r.prodReview_no and
+  		
+	  		<if test="searchboardType == 'content'">
+	  			r.replyProdReview_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="searchboardType == 'member_id'">
+	  			r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+  		(date_format(r.replyProdReview_date, '%Y-%m-%d') between #{goStartDate} and #{goEndDate}) order by r.replyProdReview_no desc limit #{pageStart}, #{perPageNum}
+  	</select>
+  	
+
+<!-- 여기서 부터 이건 검색값 없을 때 총 갯수(페이징 처리를 위해서)-->
+   <select id="ProdQA_adminCnt" resultType="int">
+  		select count(*) from ProdQAs where date_format(prodQA_date, '%Y-%m-%d') between #{goStartDate} and #{goEndDate}
+  	</select>
+
+   <select id="ProdReviewlst_adminCnt" resultType="int">
+  		select count(*) from ProdReviews where date_format(prodReview_postDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate}
+  	</select>
+  	
+  	<select id="ReplyProdReviewlst_adminCnt" resultType="int">
+  		select count(*) from ReplyProdReviews r, ProdReviews p where r.prodReview_no = p.prodReview_no and date_format(replyProdReview_date, '%Y-%m-%d') between #{goStartDate} and #{goEndDate}
+  	</select>
+  
+  
+  
+  <!-- 여기서 부터 이건 검색값 있을 때 총 갯수(페이징 처리를 위해서)-->
+  	<select id="searchProdQA_adminCnt_adminCnt" resultType="int">
+  		select count(*) from ProdQAs where
+  		
+ 			<if test="searchboardType == 'title'">
+	  			prodQA_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="searchboardType == 'content'">
+	  			prodQA_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="searchboardType == 'member_id'">
+	  			member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+  		(date_format(prodQA_date, '%Y-%m-%d') between #{goStartDate} and #{goEndDate})
+  	</select>
+  	
+  	
+  	<select id="searchProdReviewlst_adminCnt" resultType="int">
+  		select count(*) from ProdReviews where
+  		<if test="searchboardType == 'title'">
+	  			prodQA_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="searchboardType == 'content'">
+	  			prodQA_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="searchboardType == 'member_id'">
+	  			member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+		(date_format(prodReview_postDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate})
+  	</select>
+   
+  	<select id="searchReplyProdReviewlst_adminCnt" resultType="int">
+  		select count(*) from ReplyProdReviews r, ProdReviews p where r.prodReview_no = p.prodReview_no and
+  		<if test="searchboardType == 'title'">
+	  			prodQA_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="searchboardType == 'content'">
+	  			prodQA_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="searchboardType == 'member_id'">
+	  			member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+		(date_format(replyProdReview_date, '%Y-%m-%d') between #{goStartDate} and #{goEndDate})
+  	</select>
+   
+  
+  
+  <!-- ***************************************** 원영 끝 ********************************************************************************* -->
+  
+  <!-- ***************************************** 정민 ********************************************************************************* -->
+  	<!-- 게시물 페이징 리스트 -->
+  	<select id="prodList" resultType="com.cambak21.domain.ProductsVO">
+  		select * from Products where product_isDelete = 'N' order by product_id desc limit #{pageStart}, #{perPageNum} 
+  	</select>
+  	<!-- 총 게시물 개수 가져오기 -->
+  	<select id="getTotalProdListCnt" resultType="int">
+  		select count(*) from Products where product_isDelete = 'N';
+  	</select>
+  
+  	<!-- 검색된 게시글 총 개수 가져오기 -->
+  	<select id="getTotalSearchProdListCnt" resultType="int">
+  		select count(*) from Products where
+  		<choose>
+  			<!-- 상품명 검색-->
+  			<when test="searchType == 'product_name'">
+  				product_name like concat('%', #{searchWord}, '%')
+  				<!-- 메인카테고리 지정 -->
+  				<if test="mainCategory_id != 'mainCategory_id'">
+  					and mainCategory_id = #{mainCategory_id}
+  					<!-- 하위 카테고리 지정 -->
+  					<if test="middleCategory_id != 'middleCategory_id'">
+  						and middleCategory_id = #{middleCategory_id} 
+  					</if>
+  				</if>
+
+  			</when>
+  			<!-- 회사명 검색-->
+  			<when test="searchType == 'product_factory'">
+  				product_factory like concat('%', #{searchWord}, '%')
+  				<!-- 메인카테고리 지정 -->
+  				<if test="mainCategory_id != 'mainCategory_id'">
+  					and mainCategory_id = #{mainCategory_id}
+  					<!-- 하위 카테고리 지정 -->
+  					<if test="middleCategory_id != 'middleCategory_id'">
+  						and middleCategory_id = #{middleCategory_id} 
+  					</if>
+  				</if>
+
+  			</when>
+  			<!-- 전체 검색 조건 -->
+  			<when test="searchType == 'searchAll'">
+  				(product_factory like concat('%', #{searchWord}, '%') or product_name like concat('%', #{searchWord}, '%'))
+  				<!-- 메인 카테고리, 미들 카테고리 선택 유무 -->
+  				<if test="mainCategory_id != 'mainCategory_id' ">
+  					and mainCategory_id = #{mainCategory_id} 
+  					<if test="middleCategory_id != 'middleCategory_id'">
+  						and middleCategory_id = #{middleCategory_id} 
+  					</if>
+  				</if>
+
+  			</when>
+  			
+  		</choose>
+  		<!-- 진열 검색 여부 -->
+  		<if test='product_show == "Y"'>
+		  	and product_show in('Y')
+		</if>
+		<if test='product_show == "N"'>
+		  	and product_show in('N')
+		</if>
+		<if test='product_show == "all"'>
+		  	and product_show in('Y','N')
+  		</if>
+  		<!-- 날짜에 따른 검색조건 -->
+
+  		and product_date between #{checkLowDate} and #{checkHighDate} 
+  		
+  		and product_isDelete = 'N'
+  	</select>
+  
+  	<!-- **********************검색된 게시글 리스트 출력, 동적 SQL 사용 부분(검색어)************************* -->
+  	<select id="goSearchProdList" resultType="com.cambak21.domain.ProductsVO">
+  		select * from Products where
+  		<choose>
+  			<!-- 제품명 검색 조건 -->
+  			<when test="searchType == 'product_name'">
+  				product_name like concat('%', #{searchWord}, '%')
+  				<if test="mainCategory_id != 'mainCategory_id'">
+  					and mainCategory_id = #{mainCategory_id}
+  					<!-- 하위 카테고리 지정 여부 -->
+  					<if test="middleCategory_id != 'middleCategory_id'">
+  						and middleCategory_id = #{middleCategory_id} 
+  					</if>
+  				</if>
+  			</when>
+  			<!-- 회사명 검색 조건 -->
+  			<when test="searchType == 'product_factory'">
+  				product_factory like concat('%', #{searchWord}, '%')
+  				<if test="mainCategory_id != 'mainCategory_id' ">
+  					and mainCategory_id = #{mainCategory_id} 
+  					<if test="middleCategory_id != 'middleCategory_id'">
+  						and middleCategory_id = #{middleCategory_id} 
+  					</if>
+  				</if>
+  			</when>
+  			<!-- 전체 검색 조건 -->
+  			<when test="searchType == 'searchAll'">
+  				(product_factory like concat('%', #{searchWord}, '%') or product_name like concat('%', #{searchWord}, '%'))
+  				<!-- 메인 카테고리, 미들 카테고리 선택 유무 -->
+  				<if test="mainCategory_id != 'mainCategory_id' ">
+  					and mainCategory_id = #{mainCategory_id} 
+  					<if test="middleCategory_id != 'middleCategory_id'">
+  						and middleCategory_id = #{middleCategory_id} 
+  					</if>
+  				</if>
+  				
+  			</when>
+  			
+  		</choose>
+  		
+  		<!-- 진열 검색 여부 -->
+  		<if test='product_show == "Y"'>
+		  	and product_show in('Y')
+		</if>
+		<if test='product_show == "N"'>
+		  	and product_show in('N')
+		</if>
+		<if test='product_show == "all"'>
+		  	and product_show in('Y','N')
+  		</if>
+  				
+  		<!-- 날짜에 따른 검색조건 -->
+
+  		and product_date between #{checkLowDate} and #{checkHighDate} 
+  		
+  		and product_isDelete = 'N'
+  		
+  		order by product_id desc limit #{pageStart}, #{perPageNum}
+  	</select>
+  
+  	<!-- ajax 이용 메인 카테고리 리스트 출력 -->
+  	<select id="getMainCategories" resultType="com.cambak21.domain.MainCategoryVO">
+  		select * from MainCategories;
+  	</select>
+  
+  	<select id="getMiddleCategories" resultType="com.cambak21.domain.MiddleCategoryVO">
+  		select * from MiddleCategories where mainCategory_id=#{mainCategory_id}
+  	</select>
+  
+  	<update id="deleteProdList">
+  		update Products set product_isDelete = 'Y' where product_id in
+  		(<foreach collection="list" item="item" separator=" , "> #{item} </foreach>)
+  	</update>
+  
+  
+
+  
+  
+  
+  <!-- ***************************************** 정민 끝 ********************************************************************************* -->
+  
+  <!-- ***************************************** 종진 ********************************************************************************* -->
+  
+  
+  	<select id="goGetBoard_admin" resultType="com.cambak21.dto.AdminBoardDTO">
+  		select * from Boards where
+	  		<if test="board_category != 'all'">
+	  			board_category = #{board_category} and 
+	  		</if>
+  		date_format(board_writeDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate} order by board_no desc limit #{pageStart}, #{perPageNum}
+  	</select>
+  	
+  	<select id="goGetreply_admin" resultType="com.cambak21.dto.AdminReplyBoardDTO">
+  		select b.board_no, b.member_id as Bmember_id, b.board_title, b.board_category, b.board_writeDate, b.board_updateDate, b.board_likeCnt, b.board_viewCnt, b.board_isDelete, b.board_replyCnt, r.replyBoard_no, r.member_id as Rmember_id, r.replyBoard_content, r.replyBoard_writeDate, r.replyBoard_updateDate, r.replyBoard_isdelete from ReplyBoards r, Boards b where r.board_no = b.board_no and 
+	  		<if test="board_category != 'all'">
+	  			 b.board_category = #{board_category} and 
+	  		</if>
+  		date_format(replyBoard_writeDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate} order by replyBoard_no desc limit #{pageStart}, #{perPageNum}
+  	</select>
+  
+  
+  
+  
+  	<select id="searchGetBoard_admin" resultType="com.cambak21.dto.AdminBoardDTO">
+  		select * from Boards where
+  		
+	  		<if test="board_category == 'all' and searchboardType == 'title'">
+	  			board_category = any (select board_category from Boards) and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'all' and searchboardType == 'content'">
+	  			board_category = any (select board_category from Boards) and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'all' and searchboardType == 'member_id'">
+	  			board_category = any (select board_category from Boards) and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'Tip' and searchboardType == 'title'">
+	  			board_category = #{board_category} and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'Tip' and searchboardType == 'content'">
+	  			board_category = #{board_category} and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'Tip' and searchboardType == 'member_id'">
+	  			board_category = #{board_category} and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'QA' and searchboardType == 'title'">
+	  			board_category = #{board_category} and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'QA' and searchboardType == 'content'">
+	  			board_category = #{board_category} and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'QA' and searchboardType == 'member_id'">
+	  			board_category = #{board_category} and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'humor' and searchboardType == 'title'">
+	  			board_category = #{board_category} and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'humor' and searchboardType == 'content'">
+	  			board_category = #{board_category} and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'humor' and searchboardType == 'member_id'">
+	  			board_category = #{board_category} and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'notice' and searchboardType == 'title'">
+	  			board_category = #{board_category} and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'notice' and searchboardType == 'content'">
+	  			board_category = #{board_category} and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'notice' and searchboardType == 'member_id'">
+	  			board_category = #{board_category} and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'CS' and searchboardType == 'title'">
+	  			board_category = #{board_category} and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'CS' and searchboardType == 'content'">
+	  			board_category = #{board_category} and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'CS' and searchboardType == 'member_id'">
+	  			board_category = #{board_category} and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+  		(date_format(board_writeDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate}) order by board_no desc limit #{pageStart}, #{perPageNum}
+  	</select>
+  	
+  	
+  	<select id="searchGetreply_admin" resultType="com.cambak21.dto.AdminReplyBoardDTO">
+  		select b.board_no, b.member_id as Bmember_id, b.board_title, b.board_category, b.board_writeDate, b.board_updateDate, b.board_likeCnt, b.board_viewCnt, b.board_isDelete, b.board_replyCnt, r.replyBoard_no, r.member_id as Rmember_id, r.replyBoard_content, r.replyBoard_writeDate, r.replyBoard_updateDate, r.replyBoard_isdelete from ReplyBoards r, Boards b where
+  		
+  			<if test="board_category == 'all' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = any (select board_category from Boards) and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'all' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = any (select board_category from Boards) and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'all' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = any (select board_category from Boards) and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+
+			<if test="board_category == 'Tip' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'Tip' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'Tip' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+
+			<if test="board_category == 'QA' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'QA' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'QA' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+
+			<if test="board_category == 'humor' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'humor' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'humor' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+
+			<if test="board_category == 'notice' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'notice' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'notice' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+
+			<if test="board_category == 'CS' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'CS' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'CS' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+		(date_format(replyBoard_writeDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate}) order by r.replyBoard_no desc limit #{pageStart}, #{perPageNum}
+  		</select>
+  
+  
+  	<select id="getTodayTotCnt" resultType="int">
+  		select count(*) from Boards where date_format(board_writeDate, '%Y-%m-%d') = date_format(now(), '%Y-%m-%d')
+  	</select>
+  
+  	<select id="getTodayreplyTotCnt" resultType="int">
+  		select count(*) from ReplyBoards where date_format(replyBoard_writeDate, '%Y-%m-%d') = date_format(now(), '%Y-%m-%d')
+  	</select>
+  
+  
+   <select id="getBoard_adminCnt" resultType="int">
+  		select count(*) from Boards where
+	  		<if test="board_category != 'all'">
+	  			board_category = #{board_category} and 
+	  		</if>
+  		date_format(board_writeDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate}
+  	</select>
+  	
+  	<select id="getReply_adminCnt" resultType="int">
+  		select count(*) from ReplyBoards r, Boards b where r.board_no = b.board_no and 
+	  		<if test="board_category != 'all'">
+	  			 b.board_category = #{board_category} and 
+	  		</if>
+  		date_format(replyBoard_writeDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate}
+  	</select>
+  
+  
+  
+  
+  	<select id="getsearchBoard_adminCnt" resultType="int">
+  		select count(*) from Boards where
+  		
+	  		<if test="board_category == 'all' and searchboardType == 'title'">
+	  			board_category = any (select board_category from Boards) and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'all' and searchboardType == 'content'">
+	  			board_category = any (select board_category from Boards) and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'all' and searchboardType == 'member_id'">
+	  			board_category = any (select board_category from Boards) and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'Tip' and searchboardType == 'title'">
+	  			board_category = #{board_category} and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'Tip' and searchboardType == 'content'">
+	  			board_category = #{board_category} and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'Tip' and searchboardType == 'member_id'">
+	  			board_category = #{board_category} and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'QA' and searchboardType == 'title'">
+	  			board_category = #{board_category} and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'QA' and searchboardType == 'content'">
+	  			board_category = #{board_category} and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'QA' and searchboardType == 'member_id'">
+	  			board_category = #{board_category} and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'humor' and searchboardType == 'title'">
+	  			board_category = #{board_category} and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'humor' and searchboardType == 'content'">
+	  			board_category = #{board_category} and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'humor' and searchboardType == 'member_id'">
+	  			board_category = #{board_category} and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'notice' and searchboardType == 'title'">
+	  			board_category = #{board_category} and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'notice' and searchboardType == 'content'">
+	  			board_category = #{board_category} and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'notice' and searchboardType == 'member_id'">
+	  			board_category = #{board_category} and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'CS' and searchboardType == 'title'">
+	  			board_category = #{board_category} and board_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'CS' and searchboardType == 'content'">
+	  			board_category = #{board_category} and board_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+	  		<if test="board_category == 'CS' and searchboardType == 'member_id'">
+	  			board_category = #{board_category} and member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+  		(date_format(board_writeDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate})
+  	</select>
+  	
+  	
+  	<select id="getsearchReply_adminCnt" resultType="int">
+  		select count(*) from ReplyBoards r, Boards b where
+  		
+  			<if test="board_category == 'all' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = any (select board_category from Boards) and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'all' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = any (select board_category from Boards) and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'all' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = any (select board_category from Boards) and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+
+			<if test="board_category == 'Tip' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'Tip' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'Tip' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+
+			<if test="board_category == 'QA' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'QA' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'QA' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+
+			<if test="board_category == 'humor' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'humor' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'humor' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+
+			<if test="board_category == 'notice' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'notice' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'notice' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+
+			<if test="board_category == 'CS' and searchboardType == 'title'">
+	  			 r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_title like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'CS' and searchboardType == 'content'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.replyBoard_content like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		<if test="board_category == 'CS' and searchboardType == 'member_id'">
+	  			r.board_no = b.board_no and b.board_category = #{board_category} and r.member_id like concat('%', #{searchTxtValue}, '%') and
+	  		</if>
+	  		
+		(date_format(replyBoard_writeDate, '%Y-%m-%d') between #{goStartDate} and #{goEndDate})
+  		</select>
+   
+  
+  		<update id="deleteBoardAdmin">
+  			update Boards set board_isDelete ='Y', board_updateDate = now() where board_no = #{no} 
+  		</update>
+  
+  		<update id="deleteReplyBoardAdmin">
+  			update ReplyBoards set replyBoard_isdelete ='Y', replyBoard_updateDate = now() where board_no = #{no} 
+  		</update>
+
+  		<update id="deleteReplyAdmin">
+  			update ReplyBoards set replyBoard_isdelete ='Y', replyBoard_updateDate = now() where replyBoard_no = #{no} 
+  		</update>
+  		
+  		<update id="recoveryBoard">
+  			update Boards set board_isDelete ='N', board_updateDate = now() where board_no = #{recoveryNum} 
+  		</update>
+  
+  		<update id="recoveryReplyBoard">
+  			update ReplyBoards set replyBoard_isdelete ='N', replyBoard_updateDate = now() where replyBoard_no = #{recoveryNum} 
+  		</update>
+  
+  		<select id="admin_PreviewRead" resultType="com.cambak21.domain.BoardVO">
+  			select * from Boards where board_no = #{no}
+  		</select>
+  		
+  		<select id="replyBoard_admin_Preview" resultType="com.cambak21.domain.ReplyBoardVO">
+  			select * from ReplyBoards where replyBoard_no = #{no}
+  		</select>
+  
+  		
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <!-- ***************************************** 종진 끝 ********************************************************************************* -->
+  
+  <!--  ***************************************** 효원 ********************************************************************************* -->
+  
+  <select id="readOrderList" resultType="com.cambak21.domain.AdminOrderListVO">
+	select pay.payment_no, pay.payment_date, buy.product_name, pay.member_id, mem.member_name, des.destination_toUser, 
+	des.destination_mobile, poin.point_usedPoint, buy.buyProduct_totPrice, 
+	del.delivery_status, pinfo.payInfo_way, pay.payment_isComit
+	from Payments pay, BuyProducts buy, Destinations des, PayInfos pinfo, Deliveries del, Points poin, Members mem
+	where pay.buyProduct_no = buy.buyProduct_no and pay.destination_no = des.destination_no and pay.payInfo_no = pinfo.payInfo_no
+	and pay.payment_serialNo = del.payment_serialNo and pay.payment_date = poin.payment_date and mem.member_id = poin.member_id
+	group by pay.payment_serialNo order by payment_date desc limit #{pageStart}, #{perPageNum}
+  </select>
+  
+  
+  <select id="readOrderListNum" resultType="int">
+	select count(*) from (select pay.payment_no, pay.payment_date, buy.product_name, pay.member_id, mem.member_name, des.destination_toUser, 
+	des.destination_mobile, poin.point_usedPoint, buy.buyProduct_totPrice, 
+	del.delivery_status, pinfo.payInfo_way, pay.payment_isComit
+	from Payments pay, BuyProducts buy, Destinations des, PayInfos pinfo, Deliveries del, Points poin, Members mem
+	where pay.buyProduct_no = buy.buyProduct_no and pay.destination_no = des.destination_no and pay.payInfo_no = pinfo.payInfo_no
+	and pay.payment_serialNo = del.payment_serialNo and pay.payment_date = poin.payment_date and mem.member_id = poin.member_id
+	group by pay.payment_serialNo) as lst
+  </select>
+  
+  
+  <select id="orderProductNum" resultType="int">
+	select count(buyProduct_no) from Payments where payment_no = #{payment_no}
+  </select>
+  
+  <select id="orderTotalPrice" resultType="int">
+	select sum(buy.buyProduct_totPrice) from
+	Payments pay, BuyProducts buy
+	where pay.buyProduct_no = buy.buyProduct_no and payment_no = #{payment_no}
+  </select>
+  
+  <select id="orderManageSearch" resultType="com.cambak21.domain.AdminOrderListVO">
+	<if test="csOrderRange == 'noRange'">
+	  	select pay.payment_no, pay.payment_date, buy.product_name, pay.member_id, mem.member_name, des.destination_toUser, 
+		des.destination_mobile, poin.point_usedPoint, buy.buyProduct_totPrice,
+		del.delivery_status, pinfo.payInfo_way, pay.payment_isComit
+		from Payments pay, BuyProducts buy, Destinations des, PayInfos pinfo, Deliveries del, Points poin, Members mem, Products pro
+		where pay.buyProduct_no = buy.buyProduct_no and pay.destination_no = des.destination_no and pay.payInfo_no = pinfo.payInfo_no
+		and pay.payment_serialNo = del.payment_serialNo and pay.payment_date = poin.payment_date and mem.member_id = poin.member_id and buy.product_id = pro.product_id
+		
+		<if test="checkOption == 'orderNum' and checkOptionSearch != null">
+			and pay.payment_no like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseName' and checkOptionSearch != null">
+			and mem.member_name like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseId' and checkOptionSearch != null">
+			and pay.member_id like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseEmail' and checkOptionSearch != null">
+			and mem.member_email like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchasePhone' and checkOptionSearch != null">
+			and mem.member_mobile like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientName' and checkOptionSearch != null">
+			and des.destination_toUser like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientPhone' and checkOptionSearch != null">
+			and des.destination_mobile like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientAddr' and checkOptionSearch != null">
+			and (des.destination_address like concat('%', #{checkOptionSearch}, '%') or des.destination_addressDetail like concat('%', #{checkOptionSearch}, '%'))
+		</if>
+		
+		<if test="searchDateRange != 'all'">
+			and pay.payment_date >= #{startDate} and pay.payment_date <![CDATA[<=]]> #{endDate}
+		</if>
+		
+		<if test="productInfo == 'prodName' and productInfoSearch != null">
+			and buy.product_name like concat('%', #{productInfoSearch}, '%')
+		</if>
+		
+		<if test="productInfo == 'manufacturer' and productInfoSearch != null">
+			and pro.product_factory like concat('%', #{productInfoSearch}, '%')
+		</if>
+		
+		<if test="purchaseStatus == 'purchaseConfirmationBefore'">
+			and pay.payment_isComit = '결제완료' and pay.payment_isChecked = 'N'
+		</if>
+		
+		<if test="purchaseStatus == 'purchaseConfirmation'">
+		and pay.payment_isComit = '결제완료' and pay.payment_isChecked = 'Y'
+		</if>
+		
+		<if test="orderStatus == 'orderDeliveryReady'">
+		and del.delivery_status = '배송전'
+		</if>
+		
+		<if test="orderStatus == 'orderOnDelivery'">
+		and del.delivery_status = '배송중'
+		</if>
+		
+		<if test="orderStatus == 'orderDeliveryCompleted'">
+		and del.delivery_status = '배송완료'
+		</if>
+		
+		group by pay.payment_serialNo order by payment_date desc limit #{pageStart}, #{perPageNum}
+  	</if>
+  	<if test="csOrderRange == 'check'">
+	 	select payment_no, payment_date, product_name, lst.member_id, member_name, destination_toUser, 
+		destination_mobile, point_usedPoint, buyProduct_totPrice,
+		delivery_status, payInfo_way, payment_isComit
+		from (select pay.payment_no, pay.payment_serialNo, pay.payment_date, buy.product_name, pay.member_id, mem.member_name, des.destination_toUser, 
+		des.destination_mobile, poin.point_usedPoint, buy.buyProduct_totPrice,
+		del.delivery_status, pinfo.payInfo_way, pay.payment_isComit
+		from Payments pay, BuyProducts buy, Destinations des, PayInfos pinfo, Deliveries del, Points poin, Members mem, Products pro
+		where pay.buyProduct_no = buy.buyProduct_no and pay.destination_no = des.destination_no and pay.payInfo_no = pinfo.payInfo_no
+		and pay.payment_serialNo = del.payment_serialNo and pay.payment_date = poin.payment_date and mem.member_id = poin.member_id and buy.product_id = pro.product_id
+		
+		<if test="checkOption == 'orderNum' and checkOptionSearch != null">
+			and pay.payment_no like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseName' and checkOptionSearch != null">
+			and mem.member_name like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseId' and checkOptionSearch != null">
+			and pay.member_id like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseEmail' and checkOptionSearch != null">
+			and mem.member_email like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchasePhone' and checkOptionSearch != null">
+			and mem.member_mobile like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientName' and checkOptionSearch != null">
+			and des.destination_toUser like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientPhone' and checkOptionSearch != null">
+			and des.destination_mobile like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientAddr' and checkOptionSearch != null">
+			and (des.destination_address like concat('%', #{checkOptionSearch}, '%') or des.destination_addressDetail like concat('%', #{checkOptionSearch}, '%'))
+		</if>
+		
+		<if test="searchDateRange != 'all'">
+			and pay.payment_date >= #{startDate} and pay.payment_date <![CDATA[<=]]> #{endDate}
+		</if>
+		
+		<if test="productInfo == 'prodName' and productInfoSearch != null">
+			and buy.product_name like concat('%', #{productInfoSearch}, '%')
+		</if>
+		
+		<if test="productInfo == 'manufacturer' and productInfoSearch != null">
+			and pro.product_factory like concat('%', #{productInfoSearch}, '%')
+		</if>
+		
+		<if test="purchaseStatus == 'purchaseConfirmationBefore'">
+			and pay.payment_isComit = '결제완료' and pay.payment_isChecked = 'N'
+		</if>
+		
+		<if test="purchaseStatus == 'purchaseConfirmation'">
+		and pay.payment_isComit = '결제완료' and pay.payment_isChecked = 'Y'
+		</if>
+		
+		<if test="orderStatus == 'orderDeliveryReady'">
+		and del.delivery_status = '배송전'
+		</if>
+		
+		<if test="orderStatus == 'orderOnDelivery'">
+		and del.delivery_status = '배송중'
+		</if>
+		
+		<if test="orderStatus == 'orderDeliveryCompleted'">
+		and del.delivery_status = '배송완료'
+		</if>
+		
+		group by pay.payment_serialNo) lst, RefundnExchanges refund
+		where lst.payment_serialNo = refund.payment_serialNo
+		
+		<if test="csStatus == 'csCancelRequest'">
+			and refund.refundnExchange_status = '주문취소요청' and refund.refundnExchange_isChecked = 'N'
+		</if>
+		
+		<if test="csStatus == 'csCancelCompleted'">
+			and refund.refundnExchange_status = '주문취소완료' and refund.refundnExchange_isChecked = 'Y'
+		</if>
+		
+		<if test="csStatus == 'csChangeRequest'">
+			and refund.refundnExchange_status = '교환요청' and refund.refundnExchange_isChecked = 'N'
+		</if>
+		
+		<if test="csStatus == 'csChangeCompleted'">
+			and refund.refundnExchange_status = '교환완료' and refund.refundnExchange_isChecked = 'Y'
+		</if>
+		
+		<if test="csStatus == 'csRefundRequest'">
+			and refund.refundnExchange_status = '환불요청' and refund.refundnExchange_isChecked = 'N'
+		</if>
+		
+		<if test="csStatus == 'csRefundCompleted'">
+			and refund.refundnExchange_status = '환불완료' and refund.refundnExchange_isChecked = 'Y'
+		</if>
+	order by payment_date desc limit #{pageStart}, #{perPageNum}
+  	</if>
+  	
+  </select>
+  
+  <select id="orderManageSearchNum" resultType="int">
+	<if test="csOrderRange == 'noRange'">
+	  	select count(*) from
+	  	(select pay.payment_no, pay.payment_date, buy.product_name, pay.member_id, mem.member_name, des.destination_toUser, 
+		des.destination_mobile, poin.point_usedPoint, buy.buyProduct_totPrice,
+		del.delivery_status, pinfo.payInfo_way, pay.payment_isComit
+		from Payments pay, BuyProducts buy, Destinations des, PayInfos pinfo, Deliveries del, Points poin, Members mem, Products pro
+		where pay.buyProduct_no = buy.buyProduct_no and pay.destination_no = des.destination_no and pay.payInfo_no = pinfo.payInfo_no
+		and pay.payment_serialNo = del.payment_serialNo and pay.payment_date = poin.payment_date and mem.member_id = poin.member_id and buy.product_id = pro.product_id
+		
+		<if test="checkOption == 'orderNum' and checkOptionSearch != null">
+			and pay.payment_no like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseName' and checkOptionSearch != null">
+			and mem.member_name like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseId' and checkOptionSearch != null">
+			and pay.member_id like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseEmail' and checkOptionSearch != null">
+			and mem.member_email like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchasePhone' and checkOptionSearch != null">
+			and mem.member_mobile like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientName' and checkOptionSearch != null">
+			and des.destination_toUser like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientPhone' and checkOptionSearch != null">
+			and des.destination_mobile like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientAddr' and checkOptionSearch != null">
+			and (des.destination_address like concat('%', #{checkOptionSearch}, '%') or des.destination_addressDetail like concat('%', #{checkOptionSearch}, '%'))
+		</if>
+		
+		<if test="searchDateRange != 'all'">
+			and pay.payment_date >= #{startDate} and pay.payment_date <![CDATA[<=]]> #{endDate}
+		</if>
+		
+		<if test="productInfo == 'prodName' and productInfoSearch != null">
+			and buy.product_name like concat('%', #{productInfoSearch}, '%')
+		</if>
+		
+		<if test="productInfo == 'manufacturer' and productInfoSearch != null">
+			and pro.product_factory like concat('%', #{productInfoSearch}, '%')
+		</if>
+		
+		<if test="purchaseStatus == 'purchaseConfirmationBefore'">
+			and pay.payment_isComit = '결제완료' and pay.payment_isChecked = 'N'
+		</if>
+		
+		<if test="purchaseStatus == 'purchaseConfirmation'">
+		and pay.payment_isComit = '결제완료' and pay.payment_isChecked = 'Y'
+		</if>
+		
+		<if test="orderStatus == 'orderDeliveryReady'">
+		and del.delivery_status = '배송전'
+		</if>
+		
+		<if test="orderStatus == 'orderOnDelivery'">
+		and del.delivery_status = '배송중'
+		</if>
+		
+		<if test="orderStatus == 'orderDeliveryCompleted'">
+		and del.delivery_status = '배송완료'
+		</if>
+		
+		group by pay.payment_serialNo) as num
+  	</if>
+  	<if test="csOrderRange == 'check'">
+	 	select count(*) from
+	 	(select payment_no, payment_date, product_name, lst.member_id, member_name, destination_toUser, 
+		destination_mobile, point_usedPoint, buyProduct_totPrice,
+		delivery_status, payInfo_way, payment_isComit
+		from (select pay.payment_no, pay.payment_serialNo, pay.payment_date, buy.product_name, pay.member_id, mem.member_name, des.destination_toUser, 
+		des.destination_mobile, poin.point_usedPoint, buy.buyProduct_totPrice,
+		del.delivery_status, pinfo.payInfo_way, pay.payment_isComit
+		from Payments pay, BuyProducts buy, Destinations des, PayInfos pinfo, Deliveries del, Points poin, Members mem, Products pro
+		where pay.buyProduct_no = buy.buyProduct_no and pay.destination_no = des.destination_no and pay.payInfo_no = pinfo.payInfo_no
+		and pay.payment_serialNo = del.payment_serialNo and pay.payment_date = poin.payment_date and mem.member_id = poin.member_id and buy.product_id = pro.product_id
+		
+		<if test="checkOption == 'orderNum' and checkOptionSearch != null">
+			and pay.payment_no like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseName' and checkOptionSearch != null">
+			and mem.member_name like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseId' and checkOptionSearch != null">
+			and pay.member_id like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchaseEmail' and checkOptionSearch != null">
+			and mem.member_email like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'PurchasePhone' and checkOptionSearch != null">
+			and mem.member_mobile like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientName' and checkOptionSearch != null">
+			and des.destination_toUser like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientPhone' and checkOptionSearch != null">
+			and des.destination_mobile like concat('%', #{checkOptionSearch}, '%')
+		</if>
+		
+		<if test="checkOption == 'RecipientAddr' and checkOptionSearch != null">
+			and (des.destination_address like concat('%', #{checkOptionSearch}, '%') or des.destination_addressDetail like concat('%', #{checkOptionSearch}, '%'))
+		</if>
+		
+		<if test="searchDateRange != 'all'">
+			and pay.payment_date >= #{startDate} and pay.payment_date <![CDATA[<=]]> #{endDate}
+		</if>
+		
+		<if test="productInfo == 'prodName' and productInfoSearch != null">
+			and buy.product_name like concat('%', #{productInfoSearch}, '%')
+		</if>
+		
+		<if test="productInfo == 'manufacturer' and productInfoSearch != null">
+			and pro.product_factory like concat('%', #{productInfoSearch}, '%')
+		</if>
+		
+		<if test="purchaseStatus == 'purchaseConfirmationBefore'">
+			and pay.payment_isComit = '결제완료' and pay.payment_isChecked = 'N'
+		</if>
+		
+		<if test="purchaseStatus == 'purchaseConfirmation'">
+		and pay.payment_isComit = '결제완료' and pay.payment_isChecked = 'Y'
+		</if>
+		
+		<if test="orderStatus == 'orderDeliveryReady'">
+		and del.delivery_status = '배송전'
+		</if>
+		
+		<if test="orderStatus == 'orderOnDelivery'">
+		and del.delivery_status = '배송중'
+		</if>
+		
+		<if test="orderStatus == 'orderDeliveryCompleted'">
+		and del.delivery_status = '배송완료'
+		</if>
+		
+		group by pay.payment_serialNo) lst, RefundnExchanges refund
+		where lst.payment_serialNo = refund.payment_serialNo
+		
+		<if test="csStatus == 'csCancelRequest'">
+			and refund.refundnExchange_status = '주문취소요청' and refund.refundnExchange_isChecked = 'N'
+		</if>
+		
+		<if test="csStatus == 'csCancelCompleted'">
+			and refund.refundnExchange_status = '주문취소완료' and refund.refundnExchange_isChecked = 'Y'
+		</if>
+		
+		<if test="csStatus == 'csChangeRequest'">
+			and refund.refundnExchange_status = '교환요청' and refund.refundnExchange_isChecked = 'N'
+		</if>
+		
+		<if test="csStatus == 'csChangeCompleted'">
+			and refund.refundnExchange_status = '교환완료' and refund.refundnExchange_isChecked = 'Y'
+		</if>
+		
+		<if test="csStatus == 'csRefundRequest'">
+			and refund.refundnExchange_status = '환불요청' and refund.refundnExchange_isChecked = 'N'
+		</if>
+		
+		<if test="csStatus == 'csRefundCompleted'">
+			and refund.refundnExchange_status = '환불완료' and refund.refundnExchange_isChecked = 'Y'
+		</if>
+	) as num
+  	</if>
+  	
+  </select>
+  
+  <select id="readBuyerInfo" resultType="com.cambak21.domain.OrderManagementBuyerInfoVO">
+  	select mem.member_id, mem.grade_name, mem.member_name, mem.member_birth, mem.member_email, mem.member_mobile from
+	Members mem, Payments pay where mem.member_id = pay.member_id and pay.payment_no = #{payment_no} group by member_id
+  </select>
+  
+  
+  <select id="readDestinationInfo" resultType="com.cambak21.domain.OrderManagementDestinationInfoVO">
+  	select des.destination_no, des.destination_nickname, des.destination_mobile, des.destination_zipCode, des.destination_address, des.destination_addressDetail, des.destination_toUser, pay.payment_deliveryMsg from
+	Destinations des, Payments pay where des.destination_no = pay.destination_no and pay.payment_no = #{payment_no} group by destination_nickname
+  </select>
+  
+  
+  <select id="readPayInfo" resultType="com.cambak21.domain.OrderManagementPayInfoVO">
+  	select sum(buy.buyProduct_totPrice) as buyProduct_totPrice, buy.buyProduct_deliveriPay, poin.point_usedPoint, poin.point_futurePoint, pInfo.payInfo_way, pay.payment_isComit, pay.payment_date from BuyProducts buy, Payments pay, Points poin, PayInfos pInfo
+	where buy.buyProduct_no = pay.buyProduct_no and poin.payment_date = pay.payment_date and pay.payInfo_no = pInfo.payInfo_no and pay.payment_no =  #{payment_no}
+  </select>
+  
+  
+  <select id="readOrderStatusInfo" resultType="com.cambak21.domain.OrderStatusInfo">
+  	select del.delivery_status, pay.payment_isComit, pay.payment_isChecked from Deliveries del, Payments pay where del.payment_serialNo = pay.payment_serialNo and payment_no = #{payment_no}
+  </select>
+  
+  <select id="readOrderRequestNum" resultType="int">
+  	select count(*) from RefundnExchanges refund, Payments pay where refund.payment_serialNo = pay.payment_serialNo and payment_no = #{payment_no}
+  </select>
+  
+  <select id="readOrderRequestInfo" resultType="com.cambak21.domain.RefundnExchangeVO">
+  	select refund.refundnExchange_status, refund.refundnExchange_reason, refund.refundnExchange_date, refund.refundnExchange_isChecked, refund.refundnExchange_checkedDate
+  	from RefundnExchanges refund, Payments pay where refund.payment_serialNo = pay.payment_serialNo and payment_no = #{payment_no} limit 1
+  </select>
+  
+  
+  <select id="readOrderProductInfo" resultType="com.cambak21.domain.OrderProductInfoVO">
+  	select lst.product_id, main.mainCategory_content, middle.middleCategory_content, lst.product_name, lst.product_factory, lst.buyProduct_qty, lst.product_sellPrice, lst.buyProduct_totPrice from
+	(select prod.product_id, prod.mainCategory_id, prod.middleCategory_id, prod.product_name, prod.product_factory, buy.buyProduct_qty, prod.product_sellPrice, buy.buyProduct_totPrice from BuyProducts buy, Payments pay, Products prod
+	where buy.buyProduct_no = pay.buyProduct_no and prod.product_id = buy.product_id and pay.payment_no = #{payment_no}) as lst, MainCategories main, MiddleCategories middle
+	where middle.mainCategory_id = main.mainCategory_id and lst.middleCategory_id = middle.middleCategory_id group by product_id
+  </select>
+  
+  
+  <update id="modifyDestinationInfo">
+  	update Destinations set 
+  	destination_nickname = #{destination_nickname}, 
+  	destination_mobile = #{destination_mobile}, 
+  	destination_zipCode = #{destination_zipCode}, 
+  	destination_address = #{destination_address}, 
+  	destination_addressDetail = #{destination_addressDetail}, 
+  	destination_toUser = #{destination_toUser}
+	where destination_no = #{destination_no}
+  </update>
+  
+  
+  <update id="modifyDestinationMsg">
+  	update Payments set 
+  	payment_deliveryMsg = #{payment_deliveryMsg}
+	where payment_no = #{payment_no}
+  </update>
+  
+  <select id="getOrderSerialNo" resultType="int">
+  	select min(payment_serialNo) from Payments where payment_no = #{payment_no}
+  </select>
+  
+  <update id="modifyDeliveryInfo">
+  	update Deliveries set 
+  	delivery_status = #{delivery_status}
+	where payment_serialNo = #{payment_serialNo}
+  </update>
+  
+  <update id="modifyPurchaseInfo">
+  	update Payments set 
+  	payment_isComit = #{payment_isComit}, payment_isChecked = #{payment_isChecked}
+	where payment_no = #{payment_no}
+  </update>
+  
+  <select id="getOrderBuyProductList" resultType="int">
+  	select buyProduct_no from Payments where payment_no = #{payment_no}
+  </select>
+  
+  <select id="getOrderProductIdList" resultType="com.cambak21.domain.BuyProductVO">
+  	select buyProduct_qty, product_id from BuyProducts where buyProduct_no = #{buyProduct_no}
+  </select>
+  
+  <update id="modifyProductQty">
+	update Products set 
+	product_salseQty = product_saleQty - #{buyProduct_qty}, product_totQty = product_totQty + #{buyProduct_qty} 
+	where payment_no = #{product_id}
+  </update>
+  
+  <select id="getOrderProductSerialNo" resultType="int">
+  	select payment_serialNo from Payments where payment_no = #{payment_no}
+  </select>
+  
+  <update id="modifyCsStatusRnE">
+	update RefundnExchanges set 
+	refundnExchange_status = #{modifyContent}, refundnExchange_isChecked = #{isChecked}, refundnExchange_checkedDate = now() 
+	where payment_serialNo = #{payment_serialNo}
+  </update>
+  
+  <update id="modifyCsStatusPayment">
+	update Payments set 
+	payment_isComit = #{modifyContent}, payment_comitDate = now(), payment_isChecked = #{isChecked} 
+	where payment_serialNo = #{payment_serialNo}
+  </update>
+  
+  <select id="getOrderDate" resultType="Date">
+  	select distinct payment_date from Payments where payment_no = #{payment_no}
+  </select>
+  
+  <update id="modifyPurchaseConfirmationBefore">
+	update Points set 
+	point_savingDate = #{defaultDate}
+	where payment_date = #{orderDate}
+  </update>
+  
+  <update id="modifyPurchaseConfirmation">
+	update Points set 
+	point_savingDate = now() 
+	where payment_date = #{orderDate}
+  </update>
+  
+  <select id="getOrderUsedPoint" resultType="com.cambak21.domain.PointVO">
+  	select * from Points where payment_date = #{orderDate}
+  </select>
+  
+  <insert id="infoCanclePoint">
+  	insert into Points (member_id, grade_name, point_reason, point_usedPoint, point_futurePoint, point_savingDate, payment_date) values (#{member_id}, #{grade_name}, #{point_reason}, #{point_usedPoint}, #{point_futurePoint}, now(), #{payment_date})
+  </insert>
+  
+  <select id="getOrderTotPrice" resultType="int">
+  	select sum(buyProduct_totPrice) from BuyProducts buy, Payments pay where buy.buyProduct_no = pay.buyProduct_no and pay.payment_no = #{payment_no}
+  </select>
+  
+  <update id="changeMemberPoint">
+	update Members set 
+	member_totPoint = member_totPoint - #{point_usedPoint} 
+	where member_id = #{member_id}
+  </update>
+  
+  <select id="memberTotalPayment" resultType="int">
+  	select member_payment from Members where member_id = #{member_id}
+  </select>
+  
+  <update id="updateMemberGrade">
+	update Members set 
+	grade_name = #{grade_name}
+	where member_id = #{member_id}
+  </update>
+  
+  
+  <!-- ***************************************** 효원 끝 ********************************************************************************* -->
+
+  </mapper>

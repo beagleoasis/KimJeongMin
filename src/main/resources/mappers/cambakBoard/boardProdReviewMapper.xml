@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="com.cambak21.mappers.cambakBoard.BoardProdReviewMapper">
+  
+  	<select id="listProdBoard" resultType="com.cambak21.domain.ProdReviewVO">
+  		select * from goot6.ProdReviews where product_id = #{product_id} order by prodReview_no desc
+  	</select>
+	
+	<insert id="insertProdBoard">
+		insert into goot6.ProdReviews(product_id, member_id, prodReview_title, prodReview_content, prodReview_grade, prodReview_img, buyProduct_no) 
+		values(#{product_id}, #{member_id}, #{prodReview_title}, #{prodReview_content}, #{prodReview_grade}, #{prodReview_img}, #{buyProduct_no})
+	</insert>
+	<!-- 최신순 전체 게시물 가져오기 -->
+	<select id="listProdBoardCriteria" resultType="com.cambak21.domain.ProdReviewVO">
+		select * from goot6.ProdReviews where product_id = #{product_id}  and prodReview_isDelete = 'N' order by prodReview_no desc limit #{pageStart}, #{perPageNum}
+	</select>
+	<!-- 별점순 전체 게시물 가져오기 -->
+	<select id="listProdBoardCriteriaByGrades" resultType="com.cambak21.domain.ProdReviewVO">
+		select * from goot6.ProdReviews where product_id = #{product_id}  and prodReview_isDelete = 'N' order by prodReview_grade desc, prodReview_no desc limit #{pageStart}, #{perPageNum}
+	</select>
+	<!-- 좋아요순 전체 게시물 가져오기 -->
+	<select id="listProdBoardCriteriaByLikes" resultType="com.cambak21.domain.ProdReviewVO">
+		select * from goot6.ProdReviews where product_id = #{product_id}  and prodReview_isDelete = 'N' order by prodReview_likeCnt desc, prodReview_no desc limit #{pageStart}, #{perPageNum}
+	</select>
+	<!-- 전체 게시물 수 가져오기 -->
+	<select id="getTotalBoardCnt" resultType="int">
+		select count(*) from goot6.ProdReviews where product_id = #{product_id} and prodReview_isDelete = 'N'
+	</select>
+	
+	<!-- 게시글 번호로 해당 게시글 상세 조회 -->
+	<select id="getProdReview" resultType="com.cambak21.domain.ProdReviewVO">
+		select * from goot6.ProdReviews where prodReview_no = #{prodReview_no}
+	</select>
+	
+	<!--  게시글 수정 -->
+	<update id="updateProdReview">
+		update goot6.ProdReviews set prodReview_title=#{prodReview_title}, prodReview_content=#{prodReview_content}, prodReview_grade=#{prodReview_grade} where prodReview_no=#{prodReview_no}
+	</update>
+	
+	<!--  게시글 작성, 수정 시 상품 평점 업데이트 -->
+	<update id="updateProductAvgStarScore">
+	
+		update Products set product_prodAvgScore = if(product_prodAvgScore is not null, (select round(AVG(prodReview_grade)) 
+		FROM ProdReviews where product_id = #{product_id} and prodReview_isDelete='N'), 0) where product_id = #{product_id}
+	</update>
+	
+	<!--  게시글 삭제 시 상품 평점 업데이트 -->
+	<update id="deleteProductAvgStarScore">
+		update Products set product_prodAvgScore = if(product_prodAvgScore is not null, 0, (select round(AVG(prodReview_grade)) 
+		FROM ProdReviews where product_id = #{prodId} and prodReview_isDelete='N')) where product_id = #{prodId}
+	</update>
+	
+	<!-- 게시글 삭제 -->
+	<update id="deleteProdReview">
+		update goot6.ProdReviews set prodReview_isDelete = 'Y' where prodReview_no = #{prodReview_no}
+	</update>
+	
+	<!-- 게시글 좋아요 인서트-->
+	<insert id="insertLikeProdReviews">
+		insert into goot6.ProdReviewsLike(member_id, prodReview_no) values(#{member_id}, #{prodReview_no})
+	</insert>
+	<!-- 게시글 좋아요 카운트 +1 -->
+	<update id="updateLikeProdReviews">
+		update goot6.ProdReviews set prodReview_likeCnt = prodReview_likeCnt + 1 where prodReview_no = #{prodReview_no} 
+	</update>
+	
+	<!-- 게시글 좋아요 가져오기 -->
+	<select id="getProdReviewsLike" resultType="int">
+			select count(*) from goot6.ProdReviewsLike where member_id = #{member_id} and prodReview_no = #{prodReview_no}
+	</select>
+	
+	<!-- 게시글 좋아요 삭제 -->
+	<delete id="deleteLikeProdReviews">
+		delete from goot6.ProdReviewsLike where member_id = #{member_id} and prodReview_no = #{prodReview_no}
+	</delete>
+	
+	<!-- 게시글 좋아요 -1처리 -->
+	<update id="updateDisLikeProdReviews">
+		update goot6.ProdReviews set prodReview_likeCnt = prodReview_likeCnt - 1 where prodReview_no = #{prodReview_no} 
+	</update>
+	
+	<!-- 게시글 좋아요 수 가져오기 -->
+	<select id="getProdReviewsLikeCnt" resultType="int">
+		select prodReview_likeCnt from goot6.ProdReviews where prodReview_no = #{prodReview_no} 
+	</select>
+	
+	<!-- 구매확정한 개수 가져오기 -->
+	<select id="getConfirmedOrder" resultType="int">
+		select count(*) from BuyProducts where member_id=#{member_id} and product_id=#{product_id} and buyProduct_isFinished='Y' and buyProduct_isReviewed='N'
+	</select>
+	
+	<!-- 해당 상품에 작성된 후기 수 가져오기 -->
+	<select id="getWrittenReviewCnt" resultType="int">
+		select count(*) from ProdReviews where member_id=#{member_id} and product_id=#{product_id}
+	</select>
+	
+	<!-- 해당 상품 평균 별점 가져오기 -->
+	<select id="getStarRating" resultType="int">
+		select product_prodAvgScore from Products where product_id = #{product_id}
+	</select>
+	
+	<!--  -->
+	<select id="getReviewInfo" resultType="com.cambak21.dto.ProdReviewWritingInfoDTO">
+		select b.product_id, p.buyProduct_no from Payments p, BuyProducts b
+		where p.buyProduct_no = b.buyProduct_no
+		and p.payment_serialNo=#{payment_serialNo};
+	</select>
+ </mapper>

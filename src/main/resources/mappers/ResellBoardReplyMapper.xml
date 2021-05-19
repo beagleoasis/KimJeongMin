@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.cambak21.mapper.ResellBoardReplyMapper">
+  <insert id="ResellBoardReplyInsert">
+  	insert into ReplyResells (resellBoard_no,member_id,replyResell_content)
+	values(#{resellBoard_no},#{member_id},#{replyResell_content})
+  </insert>
+  <select id="ResellBoardReplyRead" resultType="com.cambak21.domain.ReplyResellVO">
+  SELECT * FROM goot6.ReplyResells  where resellBoard_no = #{bno} order by  replyResell_ref , replyResell_refOrder
+  </select>
+  <update id="ResellBoardUpadte">
+  update ReplyResells set replyResell_content = #{replyResell_content}, replyResell_updateDate = now()
+  where resellBoard_no = #{resellReplyBoard_no}
+  </update>
+  <delete id="ResellBoardReplyDelete">
+  delete from ReplyResells where replyResell_no = #{no}</delete>
+  
+  <select id="getResellBoardGetBnoBno" resultType="int">
+  		select resellBoard_no from ReplyResells where replyResell_no = #{no}
+  </select>
+  </mapper>

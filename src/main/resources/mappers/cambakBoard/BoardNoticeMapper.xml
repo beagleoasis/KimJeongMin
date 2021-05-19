@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.cambak21.mappers.cambakBoard.BoardNotice">
+  
+  <select id="getNoticeAll" resultType="com.cambak21.domain.BoardVO">
+  		select * from Boards where board_category = 'notice' order by board_no desc limit 0, 9
+  </select>
+  
+  <select id="getListCriteria" resultType="com.cambak21.domain.BoardVO">
+  		select * from Boards where board_category = 'notice' order by board_no desc limit #{pageStart}, #{perPageNum}
+  </select>
+  
+  <select id="getTotalNoticeCnt" resultType="int">
+  		select count(*) from Boards where board_category = 'notice'
+  </select>
+  
+  <select id="noticeRead" resultType="com.cambak21.domain.BoardVO">
+  		select * from Boards where board_no = #{no} 
+  </select>
+  
+  <update id="noticeViewCnt">
+  		update Boards set board_viewCnt = board_viewCnt + #{amount} where board_no = #{no} 
+  </update>
+  
+  <insert id="insertNotice">
+  		insert into Boards(member_id, board_title, board_category, board_content) values(#{member_id}, #{board_title}, 'notice', #{board_content})
+  </insert>
+  
+  <select id="listNoticeReply" resultType="com.cambak21.domain.ReplyBoardVO">
+  		select * from ReplyBoards where board_no = #{bno} order by replyBoard_no asc;
+  </select>
+  
+  <update id="modiReplyBoard">
+  		update ReplyBoards set replyBoard_content = #{replyBoard_content}, replyBoard_updateDate = now() where replyBoard_no = ${replyBoard_no}
+  </update>
+  
+  <insert id="insertReplyBoard">
+  		insert into ReplyBoards(board_no, replyBoard_content, member_id) values(#{board_no}, #{replyBoard_content}, #{member_id})
+  </insert>
+  
+  <update id="updateNoticeReivewCnt">
+  		update Boards set board_replyCnt = board_replyCnt + #{amount} where board_no = #{board_no}
+  </update>
+  
+  <update id="downReplyCnt">
+  		update Boards set board_replyCnt = board_replyCnt - #{amount} where board_no = #{board_no}
+  </update>
+      
+  <select id="getboard_no" resultType="int">
+  		select board_no from ReplyBoards where replyBoard_no = #{replyBoard_no}
+  </select>
+  
+  <delete id="dropReply">
+  		delete from ReplyBoards where replyBoard_no = #{replyBoard_no}
+  </delete>
+  
+  <delete id="removeNoticeBoard">
+  		delete from Boards where board_no = #{board_no}
+  </delete>
+  
+  <delete id="dropReplyAll">
+  		delete from ReplyBoards where board_no = #{board_no}
+  </delete>
+  
+  <select id="noticeSearch" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where 
+		
+		<if test="searchType == 'title'">
+			board_title like concat('%', #{searchWord}, '%')
+		</if>
+		
+		<if test="searchType == 'content'">
+			board_content like concat('%', #{searchWord}, '%')
+		</if>
+		
+		<if test="searchType == 'writer'">
+			member_id like concat('%', #{searchWord}, '%')
+		</if>
+		and board_category = 'notice' order by board_no desc limit #{pageStart}, #{perPageNum} 
+	</select>
+  
+	  <select id="getSearchTotalNoticeBoardCnt" resultType="int">
+			select count(*) from Boards where
+			
+		<if test="searchType == 'title'">
+			board_title like concat('%', #{searchWord}, '%')
+		</if>
+		
+		<if test="searchType == 'content'">
+			board_content like concat('%', #{searchWord}, '%')
+		</if>
+		
+		<if test="searchType == 'writer'">
+			member_id like concat('%', #{searchWord}, '%')
+		</if>
+			  and board_category = 'notice'
+	  </select>
+	  
+	  <update id="modiNoticeBoard">
+	  		update Boards set board_title = #{board_title}, board_content = #{board_content} where board_no = #{board_no}
+	  </update>
+  
+  
+  
+  
+  
+  
+</mapper>

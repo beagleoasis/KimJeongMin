@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.cambak21.mapper.ResellBoardMapper">
+  <insert id="ResellBoardInsert">
+  	insert into ResellBoards
+  	 (member_id, resellBoard_title, 
+  	 resellBoard_content, resellBoard_price, 
+  	 resellBoard_addr,resellBoard_img1,
+  	 resellBoard_img2, resellBoard_img3, resellBoard_img4)
+	values (#{member_id},#{resellBoard_title},
+	#{resellBoard_content},#{resellBoard_price},
+	#{resellBoard_addr},#{resellBoard_img1},
+	#{resellBoard_img2},#{resellBoard_img3},
+	#{resellBoard_img4}
+);
+  </insert>
+  <select id="ResellBoardReadAll" resultType="com.cambak21.domain.ResellBoardVO">
+  	select * from ResellBoards order by resellBoard_no desc limit #{pageStart}, #{perPageNum};
+  </select>
+  
+  
+  <select id="ResellBoardReadAllCnt" resultType="int">
+  	select count(*) from ResellBoards
+  </select>
+  
+  <select id="ResellBoardRead" resultType="com.cambak21.domain.ResellBoardVO">
+  	select * from ResellBoards where
+  	<if test="searchType == 'member_id'">
+  			member_id like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'resellBoard_title'">
+  			resellBoard_title like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'resellBoard_content'">
+  			resellBoard_content like concat('%',#{searchWord},'%')
+  	</if>
+  	order by resellBoard_no desc limit #{pageStert} ,#{pageNum}
+  </select>
+  
+  <select id="ResellBoardReadCnt" resultType="int">
+  	select count(*)  from ResellBoards where
+  	<if test="searchType == 'member_id'">
+  			member_id like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'resellBoard_title'">
+  			resellBoard_title like concat('%',#{searchWord},'%')
+  	</if>
+  	<if test="searchType == 'resellBoard_content'">
+  			resellBoard_content like concat('%',#{searchWord},'%')
+  	</if>
+  </select>	  
+  <update id="ResellBoardUpdate">
+	update ResellBoards set 
+	resellBoard_title = #{resellBoard_title},
+	resellBoard_content = #{resellBoard_content},
+	resellBoard_price = #{resellBoard_price},
+	resellBoard_addr = #{resellBoard_addr},
+	resellBoard_img1 = #{resellBoard_img1},
+	resellBoard_img2 = #{resellBoard_img2},
+	resellBoard_img3 = #{resellBoard_img3},
+	resellBoard_img4 = #{resellBoard_img4}
+	where resellBoard_no =#{resellBoard_no};
+	  </update>
+  
+  <update id="ResellBoardDelete">
+  	update ResellBoards set resellBoard_isDelete = "Y",resellBoard_deleteDate=now() where resellBoard_no =#{resellBoard_no};
+  </update>
+  
+  <update id="ResellBoardViewcnt">
+  	update ResellBoards set resellBoard_viewCnt = resellBoard_viewCnt+1 where resellBoard_no =#{no}; 
+  </update>
+<update id="ResellBoardUpdateReply">
+	update ResellBoards set resellBoard_replyCnt = #{amount} where resellBoard_no =#{no};
+</update>
+  <select id="ResellBoardReadDetail" resultType="com.cambak21.domain.ResellBoardVO">
+  	select * FROM ResellBoards where resellBoard_no = #{no}
+  </select>
+  
+  <!-- 김정민 좋아요, 댓글, 작성글 카운트 부분 -->
+  <!-- 작성글 카운트 -->
+  <select id="ResellBoardWriteCnt" resultType="int">
+  	select count(*) from goot6.ResellBoards where member_id=#{member_id} and resellBoard_isDelete ='N'
+  </select>
+  <select id="ResellBoardLikeCnt" resultType="int">
+  	select count(*) from ResellLikeBoards r, ResellBoards rb where r.member_id=#{member_id} and  r.resellBoard_no=rb.resellBoard_no and rb.resellBoard_isDelete='N'
+  </select>
+  <select id="ResellBoardReplyCnt" resultType="int">
+  	select count(*) from ReplyResells rr, ResellBoards rb where rr.member_id=#{member_id} and rr.resellBoard_no=rb.resellBoard_no and rb.resellBoard_isDelete='N';
+  </select>
+  <!-- 김정민 좋아요, 댓글, 작성글 카운트 부분 -->
+  </mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.mappers.cambakMain.memeberMapper">
+  	<update id="MemberUpdate">
+		update Members set 
+		member_name = #{member_name},
+		member_birth =STR_TO_DATE(#{member_birth}, '%Y-%m-%d'),
+		member_password = #{member_password},
+		member_email =#{member_email},
+		member_mobile = #{member_mobile},
+		member_addr = #{member_addr}
+		where member_id= #{member_id}
+    </update>
+    
+    <select id="memberDelCheck" resultType="int">
+    	select count(*) from Members where member_id = #{member_id} and member_password =md5(sha1(#{member_password}))
+    </select>
+    
+    <update id="MemberDelete">
+    	update Members set member_isDelete = 'Y' where member_id = #{member_id}
+    </update>
+    
+    <select id="findId" resultType="com.cambak21.domain.FindIdVO">
+    	select member_id, member_name from Members where member_name = #{member_name} and member_email = #{member_email}
+    </select>
+    
+    <select id="findPwd" resultType="com.cambak21.domain.FindIdVO">
+    	select * from Members where member_id = #{member_id} and member_email = #{member_email}	
+    </select>
+    
+    <update id="updatePwd">
+    	update Members set member_password = md5(sha1(#{member_password})) where member_id= #{member_id}
+    </update>
+
+	<select id="login" resultType="com.cambak21.domain.MemberVO">
+	 	select * from Members where member_id = #{member_id} and member_password = md5(sha1(#{member_password}))
+	</select>
+	  	
+	<update id="keepLogin">
+	  	update Members set member_cookie = #{member_cookie}, member_cookieAge = #{member_cookieAge} where member_id = #{member_id}
+	</update>
+	  	
+	<select id="checkUserWithSesKey" resultType="com.cambak21.domain.MemberVO">
+	  	select * from Members where member_cookie = #{member_cookie} and member_cookieAge > now()
+	</select>
+	
+	<select id="checkEmail" resultType="int">
+		select count(*) from Members where member_email = #{member_email}
+		<if test="member_id == null">
+			and member_name = #{member_name}
+		</if>
+		<if test="member_name == null">
+			and member_id = #{member_id}
+		</if>
+	</select>
+	
+<!-- 	서효원 mapper -->
+	<select id="checkUserId" resultType="int">
+		select count(*) from Members where member_id = #{member_id}
+	</select>
+	
+	<select id="registerEmailChk" resultType="int">
+	select count(*) from Members where member_email = #{userEmail}
+	</select>
+	
+	<insert id="MemberInsert">
+		Insert into Members
+		<if test="member_addrDetail != null">
+		(member_id, member_password, member_name, member_gender, member_birth, member_postCode, member_addr, member_addrDetail, member_email, member_mobile, member_img)
+		values (#{member_id}, md5(sha1(#{member_password})), #{member_name}, #{member_gender}, #{member_birth}, #{member_postCode}, #{member_addr}, #{member_addrDetail}, #{member_email}, #{member_mobile}, #{member_img})
+		</if>
+		<if test="member_addrDetail == null">
+		(member_id, member_password, member_name, member_gender, member_birth, member_postCode, member_addr, member_email, member_mobile, member_img)
+		values (#{member_id}, md5(sha1(#{member_password})), #{member_name}, #{member_gender}, #{member_birth}, #{member_postCode}, #{member_addr}, #{member_email}, #{member_mobile}, #{member_img})
+		</if>
+    </insert>
+	
+	<select id="memberSelect" resultType="com.cambak21.domain.MemberVO">
+		SELECT * FROM Members where member_id = #{memberId}
+	</select>
+	
+	<select id="loginRequestCheck" resultType="int">
+		SELECT count(*) FROM Members where member_id = #{member_id} and member_password = md5(sha1(#{member_password}))
+	</select>
+	
+	<update id="updateMemberInfo">
+		update Members set
+		<if test="member_password != null">
+		member_password = md5(sha1(#{member_password})),
+		</if>
+		member_gender = #{member_gender},
+		member_postCode = #{member_postCode},
+		member_addr = #{member_addr},
+		<if test="member_addrDetail != null">
+		member_addrDetail = #{member_addrDetail},
+		</if>
+		<if test="member_mobile != null">
+		member_mobile = #{member_mobile},
+		</if>
+		member_img = #{member_img}
+		where member_id = #{member_id}
+	</update>
+	
+	<select id="modifyCheckUser" resultType="int">
+		select count(*) from Members where member_id = #{member_id} and member_password = md5(sha1(#{member_password}))
+	</select>
+	
+	<update id="userKakaoInterlock">
+		update Members set
+		member_kakaoInterlockDate = #{interlockDate},
+		member_kakaoId = #{userKakaoId}
+		where member_id = #{member_id}
+	</update>
+	
+	<update id="kakaoRelease">
+		update Members set
+		member_kakaoInterlockDate = #{defaultDate},
+		member_kakaoId = NULL
+		where member_id = #{member_id}
+	</update>
+	
+	<select id="kakaoLogin" resultType="com.cambak21.domain.MemberVO">
+		select * from Members where member_kakaoId = #{userKakaoId}
+	</select>
+	
+<!-- 	서효원 mapper -->
+	
+  </mapper>

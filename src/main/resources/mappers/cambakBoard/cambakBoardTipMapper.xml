@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.cambak21.mappers.cambakBoard.tipBoardMapper">
+	
+<!-- 	캠핑팁 게시판 전체 조회 -->
+	<select id="selectTipBoard" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where board_category = 'Tip' order by board_writeDate desc limit #{pageStart}, #{perPageNum}
+	</select>
+	
+	<select id="totalTipBoard" resultType="int">
+		select count(*) from Boards where board_category = 'Tip'
+	</select>
+	
+<!-- 	캠핑팀 게시판 상세보기 -->
+	<update id="upViewCount">
+		update Boards set board_viewCnt = board_viewCnt + 1 where board_no = #{board_no}
+	</update>
+	
+<!-- 	캠핑팀 게시판 상세보기 -->
+	<select id="viewTipBoard" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where board_category = #{board_category} and board_no = #{board_no};
+	</select>
+	
+<!-- 	게시글 쓰기 insert -->
+	<insert id="writeTipBoard">
+			insert into Boards (member_id, board_title, board_category, board_content) values (#{member_id}, #{board_title}, #{board_category}, #{board_content})
+	</insert>
+	
+<!-- 	방금 작성된 게시글 글번호 조회 -->
+	<select id="searchBoardNum" resultType="int">
+		select max(board_no) from Boards where member_id = #{member_id} and board_title = #{board_title} and board_content = #{board_content} and board_category = #{board_category}
+	</select>
+	
+<!-- 	게시글 수정 update -->
+	<update id="modifyTipBoard">
+		update Boards set member_id = #{member_id}, board_title = #{board_title}, board_category = #{board_category}, board_content = #{board_content} where board_no = #{board_no}
+	</update>
+	
+<!-- 	해당 게시글 삭제 -->
+	<delete id="deleteTipBoardReply">
+		delete from ReplyBoards where board_no = #{board_no}
+	</delete>
+	<delete id="deleteTipBoard">
+		delete from Boards where board_no = #{board_no}
+	</delete>
+	
+<!-- 	캠핑팁 게시판 검색어 별 조회 -->
+	<select id="searchTipBoard" resultType="com.cambak21.domain.BoardVO">
+		select * from Boards where board_category = 'Tip' and 
+		<if test="searchType == 'writer'">
+			member_id = #{searchWord}
+		</if>
+		<if test="searchType == 'totalSearch'">
+			(board_title like concat('%', #{searchWord}, '%') or board_content like concat('%', #{searchWord}, '%'))
+		</if>
+		<if test="searchType == 'title'">
+			board_title like concat('%', #{searchWord}, '%')
+		</if>
+		<if test="searchType == 'content'">
+			board_content like concat('%', #{searchWord}, '%')
+		</if>
+		 order by board_no desc limit #{pageStart}, #{perPageNum}
+	</select>
+	
+<!-- 	캠핑팁 게시판 검색 결과 개수 가져오기 -->
+	<select id="searchTipBoardSearch" resultType="int">
+		select count(*) from Boards where board_category = 'Tip' and 
+		<if test="searchType == 'writer'">
+			member_id = #{searchWord}
+		</if>
+		<if test="searchType == 'totalSearch'">
+			(board_title like concat('%', #{searchWord}, '%') or board_content like concat('%', #{searchWord}, '%'))
+		</if>
+		<if test="searchType == 'title'">
+			board_title like concat('%', #{searchWord}, '%')
+		</if>
+		<if test="searchType == 'content'">
+			board_content like concat('%', #{searchWord}, '%')
+		</if>
+	</select>
+
+<!-- 	해당 게시글 조회(댓글) -->
+	<select id="detailTipBoard" resultType="com.cambak21.domain.ReplyBoardVO">
+		select * from ReplyBoards where board_no = #{board_no} and replyBoard_refOrder = 0 order by replyBoard_writeDate desc;
+	</select>
+
+<!-- 	댓글은 더보기 버튼 -->
+	<select id="moreViewTipBoard" resultType="com.cambak21.domain.ReplyBoardVO">
+		select * from ReplyBoards where board_no = #{board_no} and replyBoard_refOrder > 0 order by replyBoard_writeDate desc, replyBoard_ref desc, replyBoard_refOrder desc;
+	</select>
+
+<!-- 	해당 게시글 좋아요 -->
+	<update id="likeTipBoardUpdate">
+		update Boards set board_likeCnt = board_likeCnt + 1 where board_no = #{board_no}
+	</update>
+	<insert id="likeTipBoardInsert">
+		insert into LikeBoards (member_id, board_no) values (#{member_id}, #{board_no})
+	</insert>
+
+<!-- 	해당 게시글에 댓글 작성 -->
+	<insert id="saveReplyTipBoard">
+		insert into ReplyBoards (board_no, member_id, replyBoard_content) values (#{board_no}, #{member_id}, #{replyBoard_content})
+	</insert>
+	<select id="searchMaxNo" resultType="int">
+		select if(max(replyBoard_no) is null, 1, (select max(replyBoard_no) from ReplyBoards where board_no = #{board_no} and member_id = #{member_id})) from ReplyBoards;
+	</select>
+	<update id="updateReplyRef">
+		update ReplyBoards set replyBoard_ref = #{replyBoard_no} where replyBoard_no = #{replyBoard_no}
+	</update>
+	<update id="updateReplyCnt">
+		update Boards set board_replyCnt = board_replyCnt + 1 where board_no = #{board_no}
+	</update>
+
+<!-- 	해당 게시글의 댓글 수정 -->
+	<update id="modifyReplyTipBoard">
+		update ReplyBoards set replyBoard_content = #{replyBoard_content} where replyBoard_no = #{replyBoard_no}
+	</update>
+
+<!-- 	해당 게시글의 댓글 삭제 -->
+	<update id="deleteReplyTipBoard">
+		update ReplyBoards set replyBoard_isdelete = 'Y' where replyBoard_no = #{replyBoard_no};
+	</update>
+	<update id="deleteReplyTipBoardCount">
+		update Boards set board_replyCnt = board_replyCnt - 1 where board_no = #{board_no};
+	</update>
+
+<!-- 대댓글 작성 -->
+	<select id="checkMaxReforder" resultType="int">
+		select max(replyBoard_refOrder) + 1 from ReplyBoards where board_no = #{board_no} and replyBoard_ref = #{replyBoard_ref}
+	</select>
+	<insert id="writeRereply">
+		insert into ReplyBoards (board_no, member_id, replyBoard_content, replyBoard_ref, replyBoard_refOrder) values (#{board_no}, #{member_id}, #{replyBoard_content}, #{replyBoard_ref}, #{replyBoard_refOrder})
+	</insert>
+	<update id="upTotalRereplyCount">
+		update ReplyBoards set replyBoard_step = replyBoard_step + 1 where replyBoard_no = #{replyBoard_no} and replyBoard_refOrder = 0
+	</update>
+
+<!-- 	대댓글 수정 -->
+	<update id="modifyRereply">
+		update ReplyBoards set replyBoard_content = #{replyBoard_content} where replyBoard_no = #{replyBoard_no}
+	</update>
+
+<!-- 	대댓글 삭제 -->
+	<delete id="deleteRereplyTipBoard">
+		delete from ReplyBoards where replyBoard_no = #{replyBoard_no}
+	</delete>
+	<update id="downTotalRereplyCount">
+		update ReplyBoards set replyBoard_step = replyBoard_step - 1 where replyBoard_no = #{replyBoard_ref} and replyBoard_refOrder = 0
+	</update>
+
+<!-- 	상세 게시글 댓글 총 개수 가져오기 -->
+	<select id="checkReplyCnt" resultType="int">
+		select board_replyCnt from Boards where board_no = #{board_no}
+	</select>
+	
+<!-- 	캠핑팁 상세글 대댓글이 없는 댓글의 구역 체크를 위한 기능 -->
+	<select id="checkStepCount" resultType="com.cambak21.domain.ReplyBoardVO">
+		select * from ReplyBoards where board_no = #{board_no} and replyBoard_refOrder = 0 order by replyBoard_writeDate desc
+	</select>
+	
+<!-- 	로그인한 유저의 상세게시글 로딩 시 해당 글 추천 여부 확인 -->
+	<select id="readLikeInfo" resultType="int">
+		select count(member_id) from LikeBoards where member_id = #{member_id} and board_no = #{board_no}
+	</select>
+	
+<!-- 	로그인한 유저의 상세게시글의 추천 버튼 클릭 시 like, dislike 중 1개 실행 -->
+	<update id="boardLikeUpdate">
+			<if test="likeBtn_result == 'like'">
+				insert into LikeBoards (member_id, board_no) values (#{member_id}, #{board_no});
+			</if>
+			<if test="likeBtn_result == 'dislike'">
+				delete from LikeBoards where member_id = #{member_id} and board_no = #{board_no};
+			</if>
+	</update>
+	
+<!-- 	로그인한 유저의 상세게시글의 추천 버튼 클릭 시 like, dislike 중 1개 실행 -->
+	<update id="boardLikeCntUpdate">
+		update Boards set board_likeCnt = board_likeCnt
+			<if test="likeBtn_result == 'like'">
+				+ 1
+			</if>
+			<if test="likeBtn_result == 'dislike'">
+				- 1
+			</if>
+		 where board_no = #{board_no}
+	</update>
+	
+<!-- 	추천 수 업데이트 완료 후 총 추천 수 확인 -->
+	<select id="checkTotalLike" resultType="int">
+		select board_likeCnt from Boards where board_no = #{board_no}
+	</select>
+	
+</mapper>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cambak21.mappers.cambakBoard.ReplyBoardCS">
+	<!-- 부모 댓글 max 구하기 -->
+	<select id="maxBoardNo" resultType="int">
+		select if(max(replyBoard_no) is null, 1, (select max(replyBoard_no) from ReplyBoards)) from ReplyBoards;
+	</select>
+	
+	<!-- 부모댓글 작성 -->
+	<insert id="parentReply">
+		insert into ReplyBoards(board_no, member_id, replyBoard_content, replyBoard_ref)
+		values(#{board_no}, #{member_id}, #{replyBoard_content}, #{replyBoard_ref});
+	</insert>
+	
+	<!-- 부모댓글 정보 가져오기 -->
+	<select id="getParentReply" resultType="com.cambak21.domain.GetReplyInfo">
+		select member_id, replyBoard_ref, replyBoard_refOrder, replyBoard_step, board_no from ReplyBoards where replyBoard_no = #{replyBoard_no};
+	</select>
+	
+	<!-- refOrder 업데이트 -->
+	<update id="refOrderUpdate">
+		update ReplyBoards 
+		set replyBoard_refOrder = replyBoard_refOrder + 1 
+		where replyBoard_ref = #{replyBoard_ref} <!-- 부모댓글의 ref -->
+		and replyBoard_refOrder > #{replyBoard_refOrder} <!-- 부모 댓글 refOrder -->
+		and board_no = ${board_no};
+	</update>
+	
+	<!-- 자식 댓글 작성 -->
+	<insert id="insertReply">
+		insert into ReplyBoards(board_no, member_id, replyBoard_content, replyBoard_ref, replyBoard_step, replyBoard_refOrder)
+		values(#{board_no}, #{member_id}, #{replyBoard_content}, #{replyBoard_ref}, #{replyBoard_step} + 1, #{replyBoard_refOrder} + 1);
+	</insert>
+	
+	<!-- 댓글 수정 -->
+	<update id="updateReply">
+		update ReplyBoards set replyBoard_content = #{replyBoard_content}
+		where replyBoard_no = #{replyBoard_no};
+	</update>
+	
+	<!-- 댓글 삭제 -->
+	<update id="deleteReply">
+		update ReplyBoards set replyBoard_content = '[삭제된 댓글입니다.]' where replyBoard_no = #{replyBoard_no};
+	</update>
+	
+	<!-- 댓글 리스트 -->
+	<select id="replyList" resultType="com.cambak21.domain.ReplyBoardVO">
+		select * from ReplyBoards where board_no = #{board_no} order by replyBoard_ref asc, replyBoard_refOrder asc;
+	</select>
+	
+	<!-- 댓글 갯수 가져오기 -->
+	<select id="getReplyCnt" resultType="int">
+		select count(*) from ReplyBoards where board_no = #{board_no} and replyBoard_content != '[삭제된 댓글입니다.]';
+	</select>
+	
+</mapper>

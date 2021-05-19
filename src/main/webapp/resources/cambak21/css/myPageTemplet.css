@@ -1,0 +1,126 @@
+.\34 u {
+	width: 100%;
+}
+
+.profile {
+	box-sizing: border-box;
+	width: 200px;
+	text-align: center;
+	border: 1px solid #F0F2F0;
+	margin-bottom: 120px 50px 0px 0px;
+}
+
+.profileSize {
+	background-color: #F0F2F0;
+	padding: 20px 0px;
+}
+
+.userProfileImg {
+	width: 64px;
+	height: 64px;
+	border-radius: 70%;
+	overflow: hidden;
+}
+
+.profileEmail {
+	font-size: 13px;
+}
+
+.nav-stacked>li {
+	margin-top: -10px;
+}
+
+.nav>li>a {
+	position: relative;
+	display: block;
+	padding: 5px 15px;
+}
+
+#category-title {
+	text-align-last: center;
+}
+
+.panel-success {
+	margin-top: 25px;
+	border-color: #d6e9c6;
+}
+
+.profileMenu1 {
+	margin-top: 10px;
+}
+
+/* 고니꼬!!!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 위에 카테고리 css */
+ul.nav.navbar-nav {
+	margin-top: 10px;
+}
+
+.myPagePagingBtn {
+	display: flex;
+	justify-content: center;
+}
+
+li.bsk-focus {
+	font-weight: 900;
+}
+
+#bsk-smallCat {
+	display: flex;
+	justify-content: center;
+}
+
+.catagory-name {
+	font-size: 16px;
+	font-family: "Malgun Gothic";
+}
+
+p.myPost {
+	display: inline-flex;
+	padding-right: 20px;
+}
+
+.bsk-owner {
+	font-size: 30px;
+	font-weight: bold;
+	margin-bottom: 0;
+}
+
+img.gradeImg {
+	width: 25px;
+}
+
+.welcome {
+    border-bottom: 1px solid lightgray;
+    margin-bottom: 20px;
+}
+
+.myPostCnt {
+	color: red;
+	font-weight: bold;
+	margin-left: 5px;
+	
+}
+
+.main-content {
+/* 	height: 500px; */
+	margin-top: 20px;
+}
+
+.small-category {
+	margin-top: 10px;
+}
+
+.myPageThead {
+	text-align: center;
+}
+
+.myPageBoard {
+	text-align: center;
+}
+
+#content {
+	font-family: 'Nanum Gothic', sans-serif;
+}
+
+.mini-category {
+	cursor: pointer;
+}

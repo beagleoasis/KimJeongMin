@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.cambak21.mappers.ChattingMapper">
+	<!-- 유저가 카톡 보낼 시 -->
+	<insert id="fromUser">
+		insert into Chattings (member_id, chatting_content)
+		values (#{member_id}, #{chatting_content});
+	</insert>
+	
+	<!-- 운영자가 카톡 보낼 시 -->
+	<insert id="fromAdmin">
+		insert into Chattings (member_id, chatting_content, chatting_toUser)
+		values ('admin', #{chatting_content}, #{member_id});
+	</insert>
+	
+	<select id="getChattingList" resultType="com.cambak21.domain.ChattingListVO">
+		select c.*, m.member_img from Chattings  c
+		inner join Members m
+		on m.member_id = c.member_id
+		where (c.member_id,c.chatting_date) in (select cc.member_id, max(cc.chatting_date) from Chattings cc group by cc.member_id) 
+		and not c.member_id='admin' 
+		order by c.chatting_date desc;
+	</select>
+	
+	<!-- 채팅 가져오기, 일대일 채팅방 -->
+	<select id="getChatting" resultType="com.cambak21.domain.ChattingListVO">
+		select c.*, m.member_img from Chattings c
+		inner join Members m
+		on m.member_id = c.member_id
+		where c.member_id= #{member_id} or chatting_toUser= #{member_id} order by chatting_date asc;
+	</select>
+	
+	<!-- 운영자 입장에서... 읽음 안읽음 업데이트 -->
+	<update id="updateIsRead">
+		<if test='who.equals("admin")'>
+			update Chattings set chatting_isRead = 'Y' where member_id = #{member_id};
+		</if>
+		<if test='who.equals("notAdmin")'>
+			update Chattings set chatting_isRead = 'Y' where chatting_toUser = #{member_id};
+		</if>
+	</update>
+	
+
+</mapper>

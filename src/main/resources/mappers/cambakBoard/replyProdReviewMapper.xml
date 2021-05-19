@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace = "com.cambak21.mappers.cambakBoard.ReplyProdReviewMapper">
+  	<!-- 글등록 전, 제일 큰 번호 가져와서 pk로 set -->
+  	<select id="getMaxNo" resultType="int">
+  		select if(max(replyProdReview_no) is not null, (select max(replyProdReview_no) from goot6.ReplyProdReviews) + 1, 1) from goot6.ReplyProdReviews
+  	</select>
+  	
+  	<!-- 대댓글 처리 -->
+  	<!-- ref는 대댓글이 아닌 경우(특정 유저 답글을 클릭 안 한 경우) ref=자기 자신의 번호 and reforder=0 -->
+  	<!-- 대댓글인 경우, ref=가장 부모 댓글의 번호 and reforder=같은 ref를 참조하고 있는 reforder중 max값을 대입 -->
+  	<select id="getMaxReforder" resultType="int">
+  		select max(replyProdReview_refOrder) + 1 from goot6.ReplyProdReviews where replyProdReview_ref = #{replyProdReview_ref}
+  	</select>
+  	
+	<!-- 댓글 작성 부분 -->  
+  	<insert id="addProdReply">
+  		insert into goot6.ReplyProdReviews(replyProdReview_no, prodReview_no, member_id, replyProdReview_content, replyProdReview_refOrder, replyProdReview_ref, replyProdReview_repMember_id) values (#{replyProdReview_no}, #{prodReview_no}, #{member_id}, #{replyProdReview_content}, #{replyProdReview_refOrder}, #{replyProdReview_ref}, #{replyProdReview_repMember_id})
+  	</insert>
+  
+  
+  	<select id="getListReply" resultType="com.cambak21.domain.ReplyProdReviewVO">
+  		select * from ReplyProdReviews where prodReview_no = #{prodReview_no} order by replyProdReview_ref asc, replyProdReview_refOrder asc
+  	</select>
+  	
+  	<!-- 댓글 삭제 처리 부분 -->
+  	<update id="deleteProdReviewReply">
+  		update goot6.ReplyProdReviews set replyProdReview_isDelete = 'Y' where replyProdReview_no = #{replyProdReview_no}
+  	</update>
+  	
+  	<!-- 댓글 수정을 위한 댓글 조회 부분 -->
+  	<select id="readProdReviewReply" resultType="string">
+  		select replyProdReview_content from goot6.ReplyProdReviews where replyProdReview_no = #{replyProdReview_no}
+  	</select>
+  	
+  	<!-- 댓글 및 대댓글 수정 -->
+  	<update id="modifyProdReviewReply">
+  		update goot6.ReplyProdReviews set replyProdReview_content = #{replyProdReview_content} where replyProdReview_no = #{replyProdReview_no}
+  	</update>
+  	
+  </mapper>
